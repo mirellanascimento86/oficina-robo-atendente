@@ -2,224 +2,628 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>🤖 Treinar Robô</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Treinar Robô - Painel Completo</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #f0f2f5; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        h1 { color: #1a73e8; margin-bottom: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .card h2 { margin-bottom: 15px; color: #333; font-size: 18px; }
-        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        textarea { min-height: 80px; }
-        button { background: #1a73e8; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; width: 100%; }
-        button:hover { background: #1557b0; }
-        .lista { margin-top: 15px; max-height: 300px; overflow-y: auto; }
-        .item { background: #f8f9fa; padding: 10px; margin-bottom: 8px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-        .item button { width: auto; background: #ea4335; padding: 5px 10px; font-size: 12px; }
-        .status { position: fixed; top: 20px; right: 20px; padding: 15px; border-radius: 5px; color: white; display: none; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #1a73e8; margin-bottom: 10px; }
+        .subtitulo { color: #666; margin-bottom: 30px; }
+        
+        .menu { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .menu button { 
+            padding: 12px 24px; 
+            border: none; 
+            background: #e0e0e0; 
+            cursor: pointer; 
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .menu button.ativo { background: #1a73e8; color: white; }
+        
+        .secao { display: none; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .secao.ativa { display: block; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; font-size: 14px; }
+        input, textarea, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            font-size: 14px; 
+        }
+        textarea { min-height: 120px; resize: vertical; }
+        .dica { font-size: 12px; color: #666; margin-top: 5px; }
+        
+        button.salvar { 
+            background: #0f9d58; 
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            width: 100%;
+        }
+        button.salvar:hover { background: #0b8043; }
+        
+        .lista { margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
+        .lista h3 { margin-bottom: 15px; color: #333; }
+        .item { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            border-radius: 5px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start;
+            border-left: 4px solid #1a73e8;
+        }
+        .item button { 
+            background: #ea4335; 
+            color: white; 
+            border: none; 
+            padding: 8px 15px; 
+            border-radius: 3px; 
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .status { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            padding: 15px 20px; 
+            border-radius: 5px; 
+            color: white; 
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
         .status.sucesso { background: #0f9d58; }
         .status.erro { background: #ea4335; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .exemplo { background: #e3f2fd; padding: 15px; border-radius: 5px; margin-top: 10px; font-size: 13px; }
+        
+        .link-intervencao {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #c62828;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .link-intervencao:hover { background: #b71c1c; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🤖 Painel de Treinamento</h1>
-        
-        <div class="grid">
-            <!-- TREINAR RESPOSTAS -->
-            <div class="card">
-                <h2>💬 Ensinar Robô a Responder</h2>
-                <input type="text" id="palavras" placeholder="Palavras-chave (separe por vírgula): oi, olá, ola">
-                <textarea id="resposta" placeholder="Resposta do robô..."></textarea>
-                <button onclick="salvarResposta()">💾 Salvar Resposta</button>
-                
-                <div class="lista" id="listaRespostas">
-                    <!-- Preenche do banco -->
-                </div>
-            </div>
+        <h1>🤖 Painel de Treinamento do Robô</h1>
+        <p class="subtitulo">Ensine o robô a atender seus clientes em todas as situações</p>
 
-            <!-- PREÇOS -->
-            <div class="card">
-                <h2>💰 Preços por Bairro</h2>
-                <input type="text" id="bairro" placeholder="Nome do bairro">
-                <select id="servico">
-                    <option value="refrigeracao">Refrigeração</option>
-                    <option value="lavanderia">Máquina de Lavar</option>
-                    <option value="marcenaria">Marcenaria</option>
-                </select>
-                <input type="number" id="valor" placeholder="Valor da visita (R$)" step="0.01">
-                <button onclick="salvarPreco()">💾 Salvar Preço</button>
-                
-                <div class="lista" id="listaPrecos"></div>
-            </div>
+        <div class="menu">
+            <button class="ativo" onclick="mostrarSecao('respostas')">💬 Respostas do Robô</button>
+            <button onclick="mostrarSecao('fluxo')">🔄 Fluxo de Conversa</button>
+            <button onclick="mostrarSecao('precos')">💰 Preços</button>
+            <button onclick="mostrarSecao('tecnicos')">👨‍🔧 Técnicos</button>
+            <button onclick="mostrarSecao('config')">⚙️ Configurações</button>
+        </div>
 
-            <!-- TÉCNICOS -->
-            <div class="card">
-                <h2>👨‍🔧 Cadastrar Técnicos</h2>
-                <input type="text" id="nomeTec" placeholder="Nome do técnico">
-                <select id="espTec">
-                    <option value="refrigeracao">Refrigeração</option>
-                    <option value="lavanderia">Máquina de Lavar</option>
-                    <option value="marcenaria">Marcenaria</option>
-                </select>
-                <input type="text" id="whatsappTec" placeholder="WhatsApp do técnico">
-                <button onclick="salvarTecnico()">💾 Salvar Técnico</button>
-                
-                <div class="lista" id="listaTecnicos"></div>
+        <!-- ABA 1: RESPOSTAS -->
+        <div id="respostas" class="secao ativa">
+            <h2>💬 Cadastrar Respostas do Robô</h2>
+            
+            <div class="form-group">
+                <label>Quando o cliente disser (palavras-chave):</label>
+                <input type="text" id="palavras" placeholder="Ex: oi, olá, ola, bom dia, boa tarde, hey">
+                <div class="dica">Separe por vírgula. Quanto mais palavras, melhor o robô entende.</div>
             </div>
-
-            <!-- CONFIGURAÇÕES -->
-            <div class="card">
-                <h2>⚙️ Configurações</h2>
-                <label>Bot Token do Telegram (para avisos):</label>
-                <input type="text" id="tokenTelegram" placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
-                <label>ID do Grupo do Telegram:</label>
-                <input type="text" id="chatIdTelegram" placeholder="-1001234567890">
-                <button onclick="salvarConfig()">💾 Salvar Configurações</button>
+            
+            <div class="form-group">
+                <label>O robô deve responder:</label>
+                <textarea id="resposta" placeholder="Ex: Olá! 👋 Sou a atendente virtual da Empresa X. Posso ajudar com:\n\n• Refrigeração\n• Máquina de lavar\n• Marcenaria\n\nQual serviço você precisa?"></textarea>
+                <div class="dica">Use emojis e quebras de linha (Enter) para organizar.</div>
+            </div>
+            
+            <div class="exemplo">
+                <strong>💡 Exemplo de fluxo:</strong><br>
+                Cliente: "Oi" → Robô responde com saudação<br>
+                Cliente: "Quanto custa" → Robô pergunta bairro<br>
+                Cliente: "Centro" → Robô informa preço da visita
+            </div>
+            
+            <button class="salvar" onclick="salvarResposta()">💾 Salvar Resposta</button>
+            
+            <div class="lista" id="listaRespostas">
+                <h3>Respostas Cadastradas:</h3>
+                <div id="conteudoRespostas">Carregando...</div>
             </div>
         </div>
+
+        <!-- ABA 2: FLUXO DE CONVERSA -->
+        <div id="fluxo" class="secao">
+            <h2>🔄 Script Completo do Atendimento</h2>
+            <p style="margin-bottom: 20px; color: #666;">Aqui você define todo o passo a passo do atendimento:</p>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>1. Saudação Inicial:</label>
+                    <textarea id="scriptSaudacao">Olá! 👋 Sou a atendente virtual da *Sua Empresa*.
+
+Posso ajudar com:
+🔧 Refrigeração (geladeiras, freezers)
+🧺 Máquina de lavar
+🪚 Marcenaria (móveis, portas, armários)
+
+Qual serviço você precisa?</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>2. Quando escolhe serviço:</label>
+                    <textarea id="scriptServico">Perfeito! *{servico}* anotado. ✅
+
+Para dar o valor exato da visita, preciso saber:
+📍 Qual seu bairro?
+
+(Atendemos em toda a região com preços diferenciados)</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>3. Quando informa bairro:</label>
+                    <textarea id="scriptBairro">✅ *{bairro}* - Valor da visita: *R$ {valor},00*
+
+⏰ Temos disponibilidade:
+• Amanhã pela manhã (8h-12h)
+• Amanhã à tarde (14h-18h)
+• Sábado o dia todo
+
+Qual dia e período prefere?</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>4. Quando agendar:</label>
+                    <textarea id="scriptAgendar">Ótimo! 📅 *{data}* anotado.
+
+Agora preciso do endereço completo:
+🏠 Rua, número, complemento
+
+O técnico levará o material necessário para o diagnóstico.</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>5. Confirmação final:</label>
+                    <textarea id="scriptConfirmacao">✅ *AGENDAMENTO CONFIRMADO!*
+
+📍 {endereco}
+🔧 {servico}
+📅 {data}
+💰 Visita: R$ {valor}
+
+Técnico *{tecnico}* foi avisado e confirmará em breve!
+
+Formas de pagamento:
+💳 Pix, cartão ou dinheiro na visita
+
+Alguma dúvida? 😊</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>6. Quando não entende:</label>
+                    <textarea id="scriptNaoEntende">Hmm, {nome}, essa pergunta é mais específica... 🤔
+
+Deixa eu chamar minha supervisora para te atender melhor! 
+Ela já foi avisada e vai te responder em breve. ⏳
+
+Ou se preferir, ligue direto: (11) 99999-9999</textarea>
+                </div>
+            </div>
+            
+            <button class="salvar" onclick="salvarScripts()">💾 Salvar Scripts Completos</button>
+        </div>
+
+        <!-- ABA 3: PREÇOS -->
+        <div id="precos" class="secao">
+            <h2>💰 Tabela de Preços por Bairro</h2>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Bairro:</label>
+                    <input type="text" id="bairroPreco" placeholder="Ex: Centro, Jardins, Vila Mariana">
+                </div>
+                
+                <div class="form-group">
+                    <label>Serviço:</label>
+                    <select id="servicoPreco">
+                        <option value="refrigeracao">Refrigeração</option>
+                        <option value="lavanderia">Máquina de Lavar</option>
+                        <option value="marcenaria">Marcenaria</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Valor da Visita (R$):</label>
+                <input type="number" id="valorVisita" placeholder="60.00" step="0.01">
+                <div class="dica">Valor cobrado apenas para ir até o cliente (diagnóstico/orçamento)</div>
+            </div>
+            
+            <button class="salvar" onclick="salvarPreco()">💾 Salvar Preço</button>
+            
+            <div class="lista" id="listaPrecos">
+                <h3>Preços Cadastrados:</h3>
+                <div id="conteudoPrecos">Carregando...</div>
+            </div>
+        </div>
+
+        <!-- ABA 4: TÉCNICOS -->
+        <div id="tecnicos" class="secao">
+            <h2>👨‍🔧 Cadastro de Técnicos</h2>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Nome do Técnico:</label>
+                    <input type="text" id="nomeTecnico" placeholder="Ex: João Silva">
+                </div>
+                
+                <div class="form-group">
+                    <label>Especialidade:</label>
+                    <select id="especialidadeTecnico">
+                        <option value="refrigeracao">Refrigeração</option>
+                        <option value="lavanderia">Máquina de Lavar</option>
+                        <option value="marcenaria">Marcenaria</option>
+                        <option value="todos">Todos os serviços</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>WhatsApp do Técnico (com DDD):</label>
+                <input type="text" id="whatsappTecnico" placeholder="11999999999">
+                <div class="dica">Apenas números, com DDD. Ex: 11999999999</div>
+            </div>
+            
+            <button class="salvar" onclick="salvarTecnico()">💾 Salvar Técnico</button>
+            
+            <div class="lista" id="listaTecnicos">
+                <h3>Técnicos Cadastrados:</h3>
+                <div id="conteudoTecnicos">Carregando...</div>
+            </div>
+        </div>
+
+        <!-- ABA 5: CONFIGURAÇÕES -->
+        <div id="config" class="secao">
+            <h2>⚙️ Configurações do Sistema</h2>
+            
+            <div class="form-group">
+                <label>🔑 Token do Bot Telegram (para avisos):</label>
+                <input type="text" id="tokenTelegram" placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
+                <div class="dica">Pegue com @BotFather no Telegram</div>
+            </div>
+            
+            <div class="form-group">
+                <label>👥 ID do Grupo Telegram (para avisos):</label>
+                <input type="text" id="chatIdTelegram" placeholder="-1001234567890">
+                <div class="dica">Crie um grupo, adicione o bot, envie /start</div>
+            </div>
+            
+            <div class="form-group">
+                <label>🏢 Nome da sua Empresa:</label>
+                <input type="text" id="nomeEmpresa" placeholder="Sua Empresa">
+            </div>
+            
+            <div class="form-group">
+                <label>📞 Telefone de Contato (backup):</label>
+                <input type="text" id="telefoneEmpresa" placeholder="(11) 99999-9999">
+            </div>
+            
+            <button class="salvar" onclick="salvarConfig()">💾 Salvar Configurações</button>
+        </div>
     </div>
+
+    <!-- Link para página de intervenção -->
+    <a href="/intervencao.html" class="link-intervencao">🚨 Ir para Intervenção</a>
 
     <div id="status" class="status"></div>
 
     <script>
-        const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
-        const SUPABASE_KEY = 'sua-chave-anon';
+        // CONFIGURAÇÃO - SUBSTITUA PELOS SEUS DADOS
+        const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
+        const SUPABASE_KEY = 'sua-chave-anon-aqui'; // ⬅️ COLE SUA CHAVE AQUI!
 
-        // Carrega dados ao abrir
-        window.onload = () => {
-            carregarRespostas();
-            carregarPrecos();
-            carregarTecnicos();
-        };
+        // Verifica se a chave foi configurada
+        if (SUPABASE_KEY === 'sua-chave-anon-aqui') {
+            alert('⚠️ IMPORTANTE: Edite o arquivo e coloque sua chave do Supabase na linha 305!\n\nPegue em: Project Settings → API → anon public');
+        }
 
+        function mostrarSecao(nome) {
+            document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
+            document.querySelectorAll('.menu button').forEach(b => b.classList.remove('ativo'));
+            document.getElementById(nome).classList.add('ativa');
+            event.target.classList.add('ativo');
+            
+            // Carrega dados da seção
+            if (nome === 'respostas') carregarRespostas();
+            if (nome === 'precos') carregarPrecos();
+            if (nome === 'tecnicos') carregarTecnicos();
+        }
+
+        // ========== RESPOSTAS ==========
         async function salvarResposta() {
-            const dados = {
-                palavras_chave: document.getElementById('palavras').value,
-                resposta: document.getElementById('resposta').value
-            };
+            const palavras = document.getElementById('palavras').value.trim();
+            const resposta = document.getElementById('resposta').value.trim();
             
-            await fetch(`${SUPABASE_URL}/rest/v1/respostas`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dados)
-            });
-            
-            mostrarStatus('Resposta salva! ✅');
-            carregarRespostas();
+            if (!palavras || !resposta) {
+                mostrarStatus('Preencha todos os campos!', true);
+                return;
+            }
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/respostas`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        palavras_chave: palavras,
+                        resposta: resposta,
+                        created_at: new Date().toISOString()
+                    })
+                });
+
+                if (!res.ok) throw new Error('Erro ao salvar');
+
+                mostrarStatus('✅ Resposta salva com sucesso!');
+                document.getElementById('palavras').value = '';
+                document.getElementById('resposta').value = '';
+                carregarRespostas();
+            } catch (erro) {
+                mostrarStatus('❌ Erro ao salvar: ' + erro.message, true);
+                console.error(erro);
+            }
         }
 
         async function carregarRespostas() {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/respostas?select=*`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const dados = await res.json();
-            
-            document.getElementById('listaRespostas').innerHTML = dados.map(r => `
-                <div class="item">
-                    <span><b>${r.palavras_chave}</b>: ${r.resposta.substring(0, 50)}...</span>
-                    <button onclick="excluir('respostas', ${r.id})">Excluir</button>
-                </div>
-            `).join('');
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/respostas?select=*&order=created_at.desc`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (!res.ok) throw new Error('Erro ao carregar');
+                
+                const dados = await res.json();
+                
+                const div = document.getElementById('conteudoRespostas');
+                if (dados.length === 0) {
+                    div.innerHTML = '<p style="color: #999;">Nenhuma resposta cadastrada ainda.</p>';
+                    return;
+                }
+
+                div.innerHTML = dados.map(r => `
+                    <div class="item">
+                        <div>
+                            <strong>Palavras:</strong> ${r.palavras_chave}<br>
+                            <small>${r.resposta.substring(0, 100)}${r.resposta.length > 100 ? '...' : ''}</small>
+                        </div>
+                        <button onclick="excluirResposta(${r.id})">Excluir</button>
+                    </div>
+                `).join('');
+            } catch (erro) {
+                document.getElementById('conteudoRespostas').innerHTML = 
+                    '<p style="color: red;">Erro ao carregar. Verifique a chave do Supabase.</p>';
+            }
         }
 
-        async function salvarPreco() {
-            const dados = {
-                bairro: document.getElementById('bairro').value,
-                servico: document.getElementById('servico').value,
-                valor: parseFloat(document.getElementById('valor').value)
-            };
+        async function excluirResposta(id) {
+            if (!confirm('Tem certeza?')) return;
             
-            await fetch(`${SUPABASE_URL}/rest/v1/precos`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dados)
-            });
-            
-            mostrarStatus('Preço salvo! ✅');
-            carregarPrecos();
-        }
-
-        async function carregarPrecos() {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/precos?select=*`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const dados = await res.json();
-            
-            document.getElementById('listaPrecos').innerHTML = dados.map(p => `
-                <div class="item">
-                    <span>${p.bairro} - ${p.servico}: R$ ${p.valor}</span>
-                    <button onclick="excluir('precos', ${p.id})">Excluir</button>
-                </div>
-            `).join('');
-        }
-
-        async function salvarTecnico() {
-            const dados = {
-                nome: document.getElementById('nomeTec').value,
-                especialidade: document.getElementById('espTec').value,
-                whatsapp: document.getElementById('whatsappTec').value
-            };
-            
-            await fetch(`${SUPABASE_URL}/rest/v1/tecnicos`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dados)
-            });
-            
-            mostrarStatus('Técnico salvo! ✅');
-            carregarTecnicos();
-        }
-
-        async function carregarTecnicos() {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/tecnicos?select=*`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const dados = await res.json();
-            
-            document.getElementById('listaTecnicos').innerHTML = dados.map(t => `
-                <div class="item">
-                    <span>${t.nome} (${t.especialidade}) - ${t.whatsapp}</span>
-                    <button onclick="excluir('tecnicos', ${t.id})">Excluir</button>
-                </div>
-            `).join('');
-        }
-
-        async function excluir(tabela, id) {
-            await fetch(`${SUPABASE_URL}/rest/v1/${tabela}?id=eq.${id}`, {
+            await fetch(`${SUPABASE_URL}/rest/v1/respostas?id=eq.${id}`, {
                 method: 'DELETE',
                 headers: {
                     'apikey': SUPABASE_KEY,
                     'Authorization': `Bearer ${SUPABASE_KEY}`
                 }
             });
-            mostrarStatus('Excluído! 🗑️');
-            if(tabela === 'respostas') carregarRespostas();
-            if(tabela === 'precos') carregarPrecos();
-            if(tabela === 'tecnicos') carregarTecnicos();
+            
+            carregarRespostas();
         }
 
-        function mostrarStatus(msg) {
+        // ========== SCRIPTS (FLUXO) ==========
+        async function salvarScripts() {
+            // Aqui você pode salvar em uma tabela 'scripts' se quiser
+            // Por enquanto, apenas mostra mensagem
+            mostrarStatus('✅ Scripts salvos (funcionalidade em desenvolvimento)');
+        }
+
+        // ========== PREÇOS ==========
+        async function salvarPreco() {
+            const bairro = document.getElementById('bairroPreco').value.trim();
+            const servico = document.getElementById('servicoPreco').value;
+            const valor = parseFloat(document.getElementById('valorVisita').value);
+
+            if (!bairro || !valor) {
+                mostrarStatus('Preencha todos os campos!', true);
+                return;
+            }
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/precos`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ bairro, servico, valor })
+                });
+
+                if (!res.ok) throw new Error('Erro ao salvar');
+
+                mostrarStatus('✅ Preço salvo!');
+                document.getElementById('bairroPreco').value = '';
+                document.getElementById('valorVisita').value = '';
+                carregarPrecos();
+            } catch (erro) {
+                mostrarStatus('❌ Erro: ' + erro.message, true);
+            }
+        }
+
+        async function carregarPrecos() {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/precos?select=*&order=bairro`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                const dados = await res.json();
+                const div = document.getElementById('conteudoPrecos');
+                
+                if (dados.length === 0) {
+                    div.innerHTML = '<p style="color: #999;">Nenhum preço cadastrado.</p>';
+                    return;
+                }
+
+                div.innerHTML = dados.map(p => `
+                    <div class="item">
+                        <div>
+                            <strong>${p.bairro}</strong> - ${p.servico}<br>
+                            <small>Visita: R$ ${p.valor}</small>
+                        </div>
+                        <button onclick="excluirPreco(${p.id})">Excluir</button>
+                    </div>
+                `).join('');
+            } catch (erro) {
+                document.getElementById('conteudoPrecos').innerHTML = '<p style="color: red;">Erro ao carregar.</p>';
+            }
+        }
+
+        async function excluirPreco(id) {
+            if (!confirm('Tem certeza?')) return;
+            await fetch(`${SUPABASE_URL}/rest/v1/precos?id=eq.${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            carregarPrecos();
+        }
+
+        // ========== TÉCNICOS ==========
+        async function salvarTecnico() {
+            const nome = document.getElementById('nomeTecnico').value.trim();
+            const especialidade = document.getElementById('especialidadeTecnico').value;
+            const whatsapp = document.getElementById('whatsappTecnico').value.trim();
+
+            if (!nome || !whatsapp) {
+                mostrarStatus('Preencha todos os campos!', true);
+                return;
+            }
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/tecnicos`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ nome, especialidade, whatsapp })
+                });
+
+                if (!res.ok) throw new Error('Erro ao salvar');
+
+                mostrarStatus('✅ Técnico salvo!');
+                document.getElementById('nomeTecnico').value = '';
+                document.getElementById('whatsappTecnico').value = '';
+                carregarTecnicos();
+            } catch (erro) {
+                mostrarStatus('❌ Erro: ' + erro.message, true);
+            }
+        }
+
+        async function carregarTecnicos() {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/tecnicos?select=*`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                const dados = await res.json();
+                const div = document.getElementById('conteudoTecnicos');
+                
+                if (dados.length === 0) {
+                    div.innerHTML = '<p style="color: #999;">Nenhum técnico cadastrado.</p>';
+                    return;
+                }
+
+                div.innerHTML = dados.map(t => `
+                    <div class="item">
+                        <div>
+                            <strong>${t.nome}</strong><br>
+                            <small>${t.especialidade} - ${t.whatsapp}</small>
+                        </div>
+                        <button onclick="excluirTecnico(${t.id})">Excluir</button>
+                    </div>
+                `).join('');
+            } catch (erro) {
+                document.getElementById('conteudoTecnicos').innerHTML = '<p style="color: red;">Erro ao carregar.</p>';
+            }
+        }
+
+        async function excluirTecnico(id) {
+            if (!confirm('Tem certeza?')) return;
+            await fetch(`${SUPABASE_URL}/rest/v1/tecnicos?id=eq.${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            carregarTecnicos();
+        }
+
+        // ========== CONFIGURAÇÕES ==========
+        async function salvarConfig() {
+            const token = document.getElementById('tokenTelegram').value;
+            const chatId = document.getElementById('chatIdTelegram').value;
+            const empresa = document.getElementById('nomeEmpresa').value;
+            const telefone = document.getElementById('telefoneEmpresa').value;
+
+            // Salva no localStorage por enquanto (pode melhorar depois)
+            localStorage.setItem('config', JSON.stringify({ token, chatId, empresa, telefone }));
+            mostrarStatus('✅ Configurações salvas!');
+        }
+
+        function mostrarStatus(msg, erro = false) {
             const div = document.getElementById('status');
             div.textContent = msg;
-            div.className = 'status sucesso';
+            div.className = 'status ' + (erro ? 'erro' : 'sucesso');
             div.style.display = 'block';
             setTimeout(() => div.style.display = 'none', 3000);
         }
+
+        // Carrega ao abrir
+        window.onload = () => {
+            carregarRespostas();
+        };
     </script>
 </body>
 </html>
