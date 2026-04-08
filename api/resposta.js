@@ -1,4 +1,4 @@
-// Quando você responde pela página de intervenção, envia pro WhatsApp
+// ENVIA RESPOSTA DO HUMANO PARA WHATSAPP
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ erro: 'Só aceito POST' });
@@ -6,14 +6,16 @@ export default async function handler(req, res) {
 
   const { telefone, mensagem } = req.body;
 
-  try {
-    const TOKEN = process.env.WHATSAPP_TOKEN;
-    const ID_NUMERO = process.env.WHATSAPP_ID_NUMERO;
+  if (!telefone || !mensagem) {
+    return res.status(400).json({ erro: 'Telefone e mensagem são obrigatórios' });
+  }
 
-    const resposta = await fetch(`https://graph.facebook.com/v18.0/${ID_NUMERO}/messages`, {
+  try {
+    // Envia pelo WhatsApp oficial
+    const resposta = await fetch(`https://graph.facebook.com/v18.0/${process.env.WHATSAPP_ID_NUMERO}/messages`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${TOKEN}`,
+        'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -31,10 +33,37 @@ export default async function handler(req, res) {
       throw new Error(dados.error.message);
     }
 
+    // Salva no histórico que humano respondeu
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/historico`, {
+      method: 'POST',
+      headers: {
+        'apikey': process.env.SUPABASE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        telefone,
+        origem: 'humano',
+        mensagem,
+        data: new Date().toISOString()
+      })
+    });
+
+    // Marca intervenção como resolvida
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/intervencoes?telefone=eq.${telefone}&status=eq.pendente`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': process.env.SUPABASE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: 'resolvido' })
+    });
+
     res.status(200).json({ sucesso: true, id: dados.messages?.[0]?.id });
 
   } catch (erro) {
-    console.error('Erro ao enviar:', erro);
+    console.error('Erro:', erro);
     res.status(500).json({ erro: erro.message });
   }
 }
