@@ -1,3 +1,27 @@
+export default async function handler(req, res) {
+  // VERIFICAÇÃO DO META (GET)
+  if (req.method === 'GET') {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+    
+    // Se é verificação do webhook
+    if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
+      console.log('Webhook verificado!');
+      return res.status(200).send(challenge); // Retorna o desafio
+    }
+    
+    return res.status(403).send('Verificação falhou');
+  }
+  
+  // MENSAGENS DO WHATSAPP (POST)
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method not allowed');
+  }
+  
+  // ... resto do seu código ...
+}
+
 // ROBÔ INTELIGENTE COM GROQ (IA GRATUITA)
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(200).send('OK');
