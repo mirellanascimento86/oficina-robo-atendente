@@ -2,122 +2,208 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚨 Intervenção - Atendimento Humano</title>
+    <title>🚨 Central de Intervenção</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #ffebee; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { color: #c62828; margin-bottom: 10px; }
-        .aviso { background: #ffcdd2; padding: 15px; border-radius: 5px; margin-bottom: 20px; color: #c62828; }
-        .chat { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }
-        .chat-header { background: #c62828; color: white; padding: 20px; }
-        .chat-body { height: 400px; overflow-y: auto; padding: 20px; background: #f5f5f5; }
-        .mensagem { margin-bottom: 15px; display: flex; }
-        .mensagem.cliente { justify-content: flex-start; }
-        .mensagem.robo { justify-content: flex-end; }
-        .bubble { max-width: 70%; padding: 12px 15px; border-radius: 15px; }
-        .cliente .bubble { background: white; border: 1px solid #ddd; }
-        .robo .bubble { background: #e3f2fd; color: #1565c0; }
-        .info { font-size: 12px; color: #999; margin-top: 5px; }
-        .chat-footer { padding: 20px; border-top: 1px solid #eee; display: flex; gap: 10px; }
-        .chat-footer textarea { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 5px; resize: none; height: 60px; }
-        .chat-footer button { background: #c62828; color: white; border: none; padding: 0 30px; border-radius: 5px; cursor: pointer; font-size: 16px; }
-        .chat-footer button:hover { background: #b71c1c; }
-        .lista-chamados { display: grid; gap: 10px; margin-bottom: 20px; }
-        .chamado { background: white; padding: 15px; border-radius: 5px; cursor: pointer; border-left: 4px solid #ccc; }
-        .chamado.ativo { border-left-color: #c62828; background: #ffebee; }
-        .chamado.novo { border-left-color: #0f9d58; animation: pulse 2s infinite; }
+        body { background: #f5f5f5; }
+        .header { background: #c62828; color: white; padding: 20px; text-align: center; }
+        .container { display: flex; height: calc(100vh - 80px); }
+        
+        /* Lista de chamados */
+        .sidebar { width: 350px; background: white; border-right: 1px solid #ddd; overflow-y: auto; }
+        .sidebar h3 { padding: 15px; background: #f5f5f5; border-bottom: 1px solid #ddd; }
+        .chamado { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+        .chamado:hover { background: #f5f5f5; }
+        .chamado.ativo { background: #ffebee; border-left: 4px solid #c62828; }
+        .chamado.novo { border-left: 4px solid #0f9d58; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { background: #e8f5e9; } 50% { background: white; } }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px; }
-        .badge.novo { background: #0f9d58; color: white; }
-        .badge.andamento { background: #f9a825; color: white; }
+        .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 5px; }
+        .badge.pendente { background: #ff9800; color: white; }
+        .badge.resolvido { background: #4caf50; color: white; }
+        
+        /* Área de chat */
+        .chat-area { flex: 1; display: flex; flex-direction: column; }
+        .chat-header { background: white; padding: 15px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; background: #e5ddd5; }
+        .msg { margin-bottom: 15px; max-width: 70%; padding: 12px 15px; border-radius: 15px; position: relative; }
+        .msg.cliente { background: white; margin-right: auto; border-bottom-left-radius: 5px; }
+        .msg.robo { background: #dcf8c6; margin-left: auto; border-bottom-right-radius: 5px; }
+        .msg.humano { background: #fff3e0; margin-left: auto; border-bottom-right-radius: 5px; border: 2px solid #ff9800; }
+        .msg-info { font-size: 11px; color: #666; margin-top: 5px; }
+        
+        /* Input */
+        .chat-input { background: white; padding: 15px; border-top: 1px solid #ddd; display: flex; gap: 10px; }
+        .chat-input textarea { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 5px; resize: none; height: 60px; }
+        .chat-input button { background: #c62828; color: white; border: none; padding: 0 25px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .chat-input button:hover { background: #b71c1c; }
+        
+        /* Enviar para qualquer número */
+        .envio-geral { background: white; padding: 15px; border-top: 2px solid #c62828; }
+        .envio-geral h4 { margin-bottom: 10px; color: #c62828; }
+        .envio-geral input, .envio-geral textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .envio-geral button { background: #1a73e8; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; width: 100%; }
+        
+        /* Info do cliente */
+        .info-cliente { font-size: 14px; color: #666; }
+        .dados-cliente { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; font-size: 13px; }
+        .dado { background: #f5f5f5; padding: 8px; border-radius: 5px; }
+        .dado strong { color: #333; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="header">
         <h1>🚨 Central de Intervenção</h1>
-        <div class="aviso">
-            ⚠️ <strong>Atenção:</strong> O robô pediu ajuda nos atendimentos abaixo. Responda rapidamente!
-        </div>
+        <p>Atenda quando o robô pedir ajuda ou envie mensagens diretas</p>
+    </div>
 
-        <div class="lista-chamados" id="listaChamados">
-            <!-- Preenche automaticamente do Supabase -->
-            <div class="chamado novo" onclick="abrirChat('11999999999', 'Maria Silva')">
-                <strong>Maria Silva</strong> <span class="badge novo">NOVO</span>
-                <div style="color: #666; font-size: 14px; margin-top: 5px;">
-                    "Quero saber se vocês fazem conserto de freezer industrial..."
-                </div>
-                <div style="color: #999; font-size: 12px; margin-top: 5px;">
-                    Chegou há 2 minutos • Tel: 11999999999
-                </div>
-            </div>
+    <div class="container">
+        <!-- Lista de chamados -->
+        <div class="sidebar">
+            <h3>📋 Chamados Pendentes</h3>
+            <div id="listaChamados">Carregando...</div>
             
-            <div class="chamado" onclick="abrirChat('11888888888', 'João Pedro')">
-                <strong>João Pedro</strong> <span class="badge andamento">Em andamento</span>
-                <div style="color: #666; font-size: 14px; margin-top: 5px;">
-                    "O técnico pode vir depois das 18h?"
-                </div>
-                <div style="color: #999; font-size: 12px; margin-top: 5px;">
-                    Aguardando resposta • Tel: 11888888888
-                </div>
-            </div>
+            <h3 style="margin-top: 20px;">✅ Resolvidos Hoje</h3>
+            <div id="listaResolvidos">Nenhum ainda</div>
         </div>
 
-        <div class="chat" id="chatAtivo" style="display: none;">
-            <div class="chat-header">
-                <h3 id="nomeCliente">Cliente</h3>
-                <small id="telefoneCliente">11999999999</small>
-            </div>
-            <div class="chat-body" id="corpoChat">
-                <div class="mensagem cliente">
-                    <div>
-                        <div class="bubble">Quero saber se vocês fazem conserto de freezer industrial da marca X</div>
-                        <div class="info">Cliente - 14:32</div>
-                    </div>
+        <!-- Área de chat -->
+        <div class="chat-area">
+            <div class="chat-header" id="chatHeader">
+                <div>
+                    <h3 id="nomeCliente">Selecione um chamado</h3>
+                    <div class="info-cliente" id="infoCliente"></div>
                 </div>
-                <div class="mensagem robo">
-                    <div>
-                        <div class="bubble">Hmm, essa pergunta é mais específica... 🤔 Deixa eu chamar minha supervisora!</div>
-                        <div class="info">Robô - 14:33</div>
-                    </div>
+                <div>
+                    <button onclick="marcarResolvido()" style="background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">✅ Marcar Resolvido</button>
                 </div>
             </div>
-            <div class="chat-footer">
-                <textarea id="respostaHumana" placeholder="Digite sua resposta aqui..."></textarea>
-                <button onclick="enviarResposta()">Enviar 📤</button>
+
+            <div class="chat-messages" id="chatMessages">
+                <div style="text-align: center; color: #999; margin-top: 50px;">
+                    Selecione um chamado ao lado ou use "Enviar mensagem direta" abaixo
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <textarea id="msgResposta" placeholder="Digite sua resposta..."></textarea>
+                <button onclick="enviarResposta()">📤 Enviar</button>
+            </div>
+
+            <!-- Enviar para qualquer número -->
+            <div class="envio-geral">
+                <h4>📤 Enviar Mensagem Direta (Qualquer Número)</h4>
+                <input type="text" id="numeroDireto" placeholder="Número do WhatsApp (ex: 5511999999999)">
+                <textarea id="msgDireta" placeholder="Mensagem..."></textarea>
+                <button onclick="enviarDireto()">📨 Enviar Mensagem Direta</button>
             </div>
         </div>
     </div>
 
     <script>
-        let clienteAtual = { telefone: '', nome: '' };
+        const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
+        const SUPABASE_KEY = 'sua-chave-anon';
+        
+        let clienteAtual = null;
+        let refreshInterval;
 
-        function abrirChat(telefone, nome) {
-            clienteAtual = { telefone, nome };
-            document.getElementById('nomeCliente').textContent = nome;
-            document.getElementById('telefoneCliente').textContent = telefone;
-            document.getElementById('chatAtivo').style.display = 'block';
-            document.getElementById('corpoChat').scrollTop = document.getElementById('corpoChat').scrollHeight;
+        // Carrega ao abrir
+        window.onload = () => {
+            carregarChamados();
+            refreshInterval = setInterval(carregarChamados, 5000); // Atualiza a cada 5 segundos
+            
+            // Verifica se veio com parâmetro de telefone (do Telegram)
+            const urlParams = new URLSearchParams(window.location.search);
+            const tel = urlParams.get('telefone');
+            if (tel) {
+                setTimeout(() => abrirChat(tel), 1000);
+            }
+        };
+
+        async function carregarChamados() {
+            // Busca intervenções pendentes
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/intervencoes?status=eq.pendente&order=data.desc`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const pendentes = await res.json();
+
+            // Busca resolvidos de hoje
+            const hoje = new Date().toISOString().split('T')[0];
+            const res2 = await fetch(`${SUPABASE_URL}/rest/v1/intervencoes?status=eq.resolvido&data=gte.${hoje}`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const resolvidos = await res2.json();
+
+            renderizarLista('listaChamados', pendentes, 'pendente');
+            renderizarLista('listaResolvidos', resolvidos, 'resolvido');
+        }
+
+        function renderizarLista(idElemento, dados, tipo) {
+            const div = document.getElementById(idElemento);
+            if (dados.length === 0) {
+                div.innerHTML = '<div style="padding: 20px; color: #999; text-align: center;">Nenhum chamado</div>';
+                return;
+            }
+
+            div.innerHTML = dados.map(c => `
+                <div class="chamado ${tipo === 'pendente' ? 'novo' : ''} ${clienteAtual?.telefone === c.telefone ? 'ativo' : ''}" 
+                     onclick="abrirChat('${c.telefone}')">
+                    <strong>${c.nome}</strong>
+                    <span class="badge ${tipo}">${tipo}</span>
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                        ${c.etapa} • ${new Date(c.data).toLocaleTimeString()}
+                    </div>
+                    <div style="font-size: 13px; margin-top: 5px; color: #333;">
+                        "${c.mensagem?.substring(0, 50)}..."
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function abrirChat(telefone) {
+            clienteAtual = { telefone };
+            
+            // Busca dados do cliente
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/clientes?telefone=eq.${telefone}&select=*`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const cliente = await res.json();
+            if (cliente[0]) {
+                clienteAtual = { ...clienteAtual, ...cliente[0] };
+                document.getElementById('nomeCliente').textContent = clienteAtual.nome;
+                document.getElementById('infoCliente').innerHTML = `
+                    📱 ${telefone} | 🔧 ${clienteAtual.servico || 'Não definido'} | 
+                    📍 ${clienteAtual.bairro || 'Não definido'} | 
+                    Etapa: ${clienteAtual.etapa}
+                `;
+            }
+
+            // Busca histórico de mensagens
+            const res2 = await fetch(`${SUPABASE_URL}/rest/v1/historico?telefone=eq.${telefone}&order=data.asc`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const mensagens = await res2.json();
+
+            const chatDiv = document.getElementById('chatMessages');
+            chatDiv.innerHTML = mensagens.map(m => `
+                <div class="msg ${m.origem}">
+                    ${m.mensagem}
+                    <div class="msg-info">${m.origem === 'cliente' ? 'Cliente' : m.origem === 'robo' ? 'Robô' : 'Você'} - ${new Date(m.data).toLocaleTimeString()}</div>
+                </div>
+            `).join('');
+            
+            chatDiv.scrollTop = chatDiv.scrollHeight;
         }
 
         async function enviarResposta() {
-            const texto = document.getElementById('respostaHumana').value;
+            if (!clienteAtual) {
+                alert('Selecione um chamado primeiro!');
+                return;
+            }
+
+            const texto = document.getElementById('msgResposta').value;
             if (!texto.trim()) return;
 
-            // Adiciona na tela
-            const div = document.createElement('div');
-            div.className = 'mensagem robo';
-            div.innerHTML = `
-                <div>
-                    <div class="bubble">${texto}</div>
-                    <div class="info">Você - ${new Date().toLocaleTimeString()}</div>
-                </div>
-            `;
-            document.getElementById('corpoChat').appendChild(div);
-            document.getElementById('respostaHumana').value = '';
-            
-            // Aqui envia pro WhatsApp via API
+            // Envia pelo WhatsApp
             await fetch('/api/resposta', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -127,14 +213,77 @@
                 })
             });
 
-            // Atualiza no Supabase que foi atendido
+            // Salva no histórico
+            await fetch(`${SUPABASE_URL}/rest/v1/historico`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    telefone: clienteAtual.telefone,
+                    origem: 'humano',
+                    mensagem: texto,
+                    data: new Date().toISOString()
+                })
+            });
+
+            // Atualiza intervenção como resolvida
+            await fetch(`${SUPABASE_URL}/rest/v1/intervencoes?telefone=eq.${clienteAtual.telefone}&status=eq.pendente`, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: 'resolvido' })
+            });
+
+            document.getElementById('msgResposta').value = '';
+            abrirChat(clienteAtual.telefone);
+            carregarChamados();
         }
 
-        // Atualiza lista a cada 10 segundos
-        setInterval(() => {
-            // Busca novas intervenções do Supabase
-            console.log('Verificando novos chamados...');
-        }, 10000);
+        async function enviarDireto() {
+            const numero = document.getElementById('numeroDireto').value;
+            const texto = document.getElementById('msgDireta').value;
+
+            if (!numero || !texto) {
+                alert('Preencha número e mensagem!');
+                return;
+            }
+
+            // Envia pelo WhatsApp
+            await fetch('/api/resposta', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    telefone: numero,
+                    mensagem: texto
+                })
+            });
+
+            alert('Mensagem enviada com sucesso!');
+            document.getElementById('numeroDireto').value = '';
+            document.getElementById('msgDireta').value = '';
+        }
+
+        async function marcarResolvido() {
+            if (!clienteAtual) return;
+            
+            await fetch(`${SUPABASE_URL}/rest/v1/intervencoes?telefone=eq.${clienteAtual.telefone}&status=eq.pendente`, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: 'resolvido' })
+            });
+            
+            carregarChamados();
+        }
     </script>
 </body>
 </html>
