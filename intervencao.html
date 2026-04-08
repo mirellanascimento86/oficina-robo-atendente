@@ -178,6 +178,7 @@
             height: 100%;
             color: #999;
             text-align: center;
+            padding: 40px;
         }
         .sem-chamado-icon { font-size: 60px; margin-bottom: 20px; }
         
@@ -248,7 +249,7 @@
     </div>
 
     <script>
-        // SUA CHAVE DO SUPABASE (JÁ CONFIGURADA)
+        // SUA CHAVE DO SUPABASE
         const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVocGlrbXFyaWVsZHBsd2tteXlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzkzMjIsImV4cCI6MjA4OTcxNTMyMn0.7q5-vcJfzqjcaiiuvDg1kMGFmWEH07bBscqKH85DN0c';
         
@@ -275,7 +276,17 @@
                     }
                 });
                 
+                // CORREÇÃO: Verifica se resposta é válida
+                if (!res.ok) {
+                    throw new Error('Erro na requisição: ' + res.status);
+                }
+                
                 const chamados = await res.json();
+                
+                // CORREÇÃO: Verifica se é array
+                if (!Array.isArray(chamados)) {
+                    throw new Error('Resposta inválida do servidor');
+                }
                 
                 if (chamados.length === 0) {
                     div.innerHTML = `
@@ -292,8 +303,8 @@
                     <div class="chamado ${clienteAtual?.telefone === c.telefone ? 'ativo' : ''} ${c.status === 'pendente' ? 'novo' : ''}" 
                          onclick="abrirChat('${c.telefone}')">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="chamado-nome">${c.nome}</span>
-                            <span class="badge ${c.status}">${c.status}</span>
+                            <span class="chamado-nome">${c.nome || 'Cliente'}</span>
+                            <span class="badge ${c.status || 'pendente'}">${c.status || 'pendente'}</span>
                         </div>
                         <div class="chamado-msg">${c.mensagem || 'Sem mensagem'}</div>
                         <div class="chamado-info">
@@ -303,7 +314,8 @@
                 `).join('');
                 
             } catch (erro) {
-                div.innerHTML = `<div class="erro-msg">❌ Erro: ${erro.message}</div>`;
+                console.error('Erro:', erro);
+                div.innerHTML = `<div class="erro-msg">❌ Erro: ${erro.message}<br><small>Tente recarregar a página</small></div>`;
             }
         }
 
@@ -314,9 +326,12 @@
                 const resCliente = await fetch(`${SUPABASE_URL}/rest/v1/clientes?telefone=eq.${telefone}&select=*`, {
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                 });
+                
+                if (!resCliente.ok) throw new Error('Erro ao buscar cliente');
+                
                 const cliente = await resCliente.json();
                 
-                if (cliente[0]) {
+                if (Array.isArray(cliente) && cliente[0]) {
                     clienteAtual = { ...clienteAtual, ...cliente[0] };
                 }
                 
@@ -353,9 +368,11 @@
                     }
                 });
                 
+                if (!res.ok) throw new Error('Erro ao carregar histórico');
+                
                 const mensagens = await res.json();
                 
-                if (mensagens.length === 0) {
+                if (!Array.isArray(mensagens) || mensagens.length === 0) {
                     div.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Sem histórico de mensagens</div>';
                     return;
                 }
@@ -373,7 +390,7 @@
                 div.scrollTop = div.scrollHeight;
                 
             } catch (erro) {
-                div.innerHTML = `<div class="erro-msg">❌ Erro ao carregar histórico: ${erro.message}</div>`;
+                div.innerHTML = `<div class="erro-msg">❌ Erro: ${erro.message}</div>`;
             }
         }
 
@@ -411,7 +428,7 @@
                 await carregarChamados();
                 
             } catch (erro) {
-                alert('❌ Erro ao enviar: ' + erro.message);
+                alert('❌ Erro: ' + erro.message);
             } finally {
                 btn.disabled = false;
                 btn.textContent = '📤 Enviar';
@@ -437,7 +454,7 @@
                 const dados = await res.json();
                 
                 if (dados.sucesso) {
-                    alert('✅ Mensagem enviada!');
+                    alert('✅ Enviado!');
                     document.getElementById('numeroDireto').value = '';
                     document.getElementById('msgDireta').value = '';
                 } else {
@@ -453,7 +470,7 @@
             if (!clienteAtual) return;
             
             try {
-                await fetch(`${SUPABASE_URL}/rest/v1/intervencoes?telefone=eq.${clienteAtual.telefone}&status=eq.pendente`, {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/intervencoes?telefone=eq.${clienteAtual.telefone}&status=eq.pendente`, {
                     method: 'PATCH',
                     headers: {
                         'apikey': SUPABASE_KEY,
@@ -462,6 +479,8 @@
                     },
                     body: JSON.stringify({ status: 'resolvido' })
                 });
+                
+                if (!res.ok) throw new Error('Erro ao marcar resolvido');
                 
                 carregarChamados();
                 
@@ -474,7 +493,7 @@
                 document.getElementById('chatHeader').innerHTML = `
                     <div class="chat-header-info">
                         <h3>Selecione um chamado</h3>
-                        <p>Chamado anterior resolvido com sucesso</p>
+                        <p>Chamado anterior resolvido</p>
                     </div>
                 `;
                 document.getElementById('msgResposta').disabled = true;
@@ -486,11 +505,6 @@
                 alert('❌ Erro: ' + erro.message);
             }
         }
-
-        // Atalho Ctrl+Enter
-        document.getElementById('msgResposta')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && e.ctrlKey) enviarResposta();
-        });
     </script>
 </body>
 </html>
