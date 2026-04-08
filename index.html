@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 Treinar Robô - Painel Completo</title>
+    <title>🤖 Treinar Robô - Oficina</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #f0f2f5; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1000px; margin: 0 auto; }
         h1 { color: #1a73e8; margin-bottom: 10px; }
         .subtitulo { color: #666; margin-bottom: 30px; }
         
@@ -34,7 +34,7 @@
             border-radius: 5px; 
             font-size: 14px; 
         }
-        textarea { min-height: 120px; resize: vertical; }
+        textarea { min-height: 100px; resize: vertical; }
         .dica { font-size: 12px; color: #666; margin-top: 5px; }
         
         button.salvar { 
@@ -48,6 +48,7 @@
             width: 100%;
         }
         button.salvar:hover { background: #0b8043; }
+        button.salvar:disabled { background: #ccc; }
         
         .lista { margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
         .lista h3 { margin-bottom: 15px; color: #333; }
@@ -79,13 +80,11 @@
             color: white; 
             display: none;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         .status.sucesso { background: #0f9d58; }
         .status.erro { background: #ea4335; }
         
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .exemplo { background: #e3f2fd; padding: 15px; border-radius: 5px; margin-top: 10px; font-size: 13px; }
         
         .link-intervencao {
             position: fixed;
@@ -97,144 +96,43 @@
             border-radius: 50px;
             text-decoration: none;
             font-weight: bold;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
-        .link-intervencao:hover { background: #b71c1c; }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #1a73e8;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .loading { text-align: center; padding: 20px; color: #666; }
+        .erro-msg { color: #c62828; padding: 10px; background: #ffebee; border-radius: 5px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🤖 Painel de Treinamento do Robô</h1>
-        <p class="subtitulo">Ensine o robô a atender seus clientes em todas as situações</p>
+        <h1>🤖 Painel de Treinamento</h1>
+        <p class="subtitulo">Configure preços, técnicos e ajuste o robô</p>
 
         <div class="menu">
-            <button class="ativo" onclick="mostrarSecao('respostas')">💬 Respostas do Robô</button>
-            <button onclick="mostrarSecao('fluxo')">🔄 Fluxo de Conversa</button>
-            <button onclick="mostrarSecao('precos')">💰 Preços</button>
+            <button class="ativo" onclick="mostrarSecao('precos')">💰 Preços por Bairro</button>
             <button onclick="mostrarSecao('tecnicos')">👨‍🔧 Técnicos</button>
             <button onclick="mostrarSecao('config')">⚙️ Configurações</button>
         </div>
 
-        <!-- ABA 1: RESPOSTAS -->
-        <div id="respostas" class="secao ativa">
-            <h2>💬 Cadastrar Respostas do Robô</h2>
-            
-            <div class="form-group">
-                <label>Quando o cliente disser (palavras-chave):</label>
-                <input type="text" id="palavras" placeholder="Ex: oi, olá, ola, bom dia, boa tarde, hey">
-                <div class="dica">Separe por vírgula. Quanto mais palavras, melhor o robô entende.</div>
+        <!-- ABA PREÇOS -->
+        <div id="precos" class="secao ativa">
+            <div class="info-box">
+                <strong>💡 Dica:</strong> Cadastre preços por bairro para o robô consultar automaticamente.
             </div>
             
-            <div class="form-group">
-                <label>O robô deve responder:</label>
-                <textarea id="resposta" placeholder="Ex: Olá! 👋 Sou a atendente virtual da Empresa X. Posso ajudar com:\n\n• Refrigeração\n• Máquina de lavar\n• Marcenaria\n\nQual serviço você precisa?"></textarea>
-                <div class="dica">Use emojis e quebras de linha (Enter) para organizar.</div>
-            </div>
-            
-            <div class="exemplo">
-                <strong>💡 Exemplo de fluxo:</strong><br>
-                Cliente: "Oi" → Robô responde com saudação<br>
-                Cliente: "Quanto custa" → Robô pergunta bairro<br>
-                Cliente: "Centro" → Robô informa preço da visita
-            </div>
-            
-            <button class="salvar" onclick="salvarResposta()">💾 Salvar Resposta</button>
-            
-            <div class="lista" id="listaRespostas">
-                <h3>Respostas Cadastradas:</h3>
-                <div id="conteudoRespostas">Carregando...</div>
-            </div>
-        </div>
-
-        <!-- ABA 2: FLUXO DE CONVERSA -->
-        <div id="fluxo" class="secao">
-            <h2>🔄 Script Completo do Atendimento</h2>
-            <p style="margin-bottom: 20px; color: #666;">Aqui você define todo o passo a passo do atendimento:</p>
-            
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>1. Saudação Inicial:</label>
-                    <textarea id="scriptSaudacao">Olá! 👋 Sou a atendente virtual da *Sua Empresa*.
-
-Posso ajudar com:
-🔧 Refrigeração (geladeiras, freezers)
-🧺 Máquina de lavar
-🪚 Marcenaria (móveis, portas, armários)
-
-Qual serviço você precisa?</textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>2. Quando escolhe serviço:</label>
-                    <textarea id="scriptServico">Perfeito! *{servico}* anotado. ✅
-
-Para dar o valor exato da visita, preciso saber:
-📍 Qual seu bairro?
-
-(Atendemos em toda a região com preços diferenciados)</textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>3. Quando informa bairro:</label>
-                    <textarea id="scriptBairro">✅ *{bairro}* - Valor da visita: *R$ {valor},00*
-
-⏰ Temos disponibilidade:
-• Amanhã pela manhã (8h-12h)
-• Amanhã à tarde (14h-18h)
-• Sábado o dia todo
-
-Qual dia e período prefere?</textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>4. Quando agendar:</label>
-                    <textarea id="scriptAgendar">Ótimo! 📅 *{data}* anotado.
-
-Agora preciso do endereço completo:
-🏠 Rua, número, complemento
-
-O técnico levará o material necessário para o diagnóstico.</textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>5. Confirmação final:</label>
-                    <textarea id="scriptConfirmacao">✅ *AGENDAMENTO CONFIRMADO!*
-
-📍 {endereco}
-🔧 {servico}
-📅 {data}
-💰 Visita: R$ {valor}
-
-Técnico *{tecnico}* foi avisado e confirmará em breve!
-
-Formas de pagamento:
-💳 Pix, cartão ou dinheiro na visita
-
-Alguma dúvida? 😊</textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>6. Quando não entende:</label>
-                    <textarea id="scriptNaoEntende">Hmm, {nome}, essa pergunta é mais específica... 🤔
-
-Deixa eu chamar minha supervisora para te atender melhor! 
-Ela já foi avisada e vai te responder em breve. ⏳
-
-Ou se preferir, ligue direto: (11) 99999-9999</textarea>
-                </div>
-            </div>
-            
-            <button class="salvar" onclick="salvarScripts()">💾 Salvar Scripts Completos</button>
-        </div>
-
-        <!-- ABA 3: PREÇOS -->
-        <div id="precos" class="secao">
-            <h2>💰 Tabela de Preços por Bairro</h2>
+            <h2>Cadastrar Preço de Visita</h2>
             
             <div class="grid-2">
                 <div class="form-group">
                     <label>Bairro:</label>
-                    <input type="text" id="bairroPreco" placeholder="Ex: Centro, Jardins, Vila Mariana">
+                    <input type="text" id="bairroPreco" placeholder="Ex: Centro, Jardins">
                 </div>
                 
                 <div class="form-group">
@@ -250,20 +148,23 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
             <div class="form-group">
                 <label>Valor da Visita (R$):</label>
                 <input type="number" id="valorVisita" placeholder="60.00" step="0.01">
-                <div class="dica">Valor cobrado apenas para ir até o cliente (diagnóstico/orçamento)</div>
             </div>
             
-            <button class="salvar" onclick="salvarPreco()">💾 Salvar Preço</button>
+            <button class="salvar" onclick="salvarPreco()" id="btnSalvarPreco">💾 Salvar Preço</button>
             
             <div class="lista" id="listaPrecos">
                 <h3>Preços Cadastrados:</h3>
-                <div id="conteudoPrecos">Carregando...</div>
+                <div id="conteudoPrecos"><div class="loading">Carregando...</div></div>
             </div>
         </div>
 
-        <!-- ABA 4: TÉCNICOS -->
+        <!-- ABA TÉCNICOS -->
         <div id="tecnicos" class="secao">
-            <h2>👨‍🔧 Cadastro de Técnicos</h2>
+            <div class="info-box">
+                <strong>💡 Dica:</strong> O robô avisa automaticamente o técnico quando fecha agendamento.
+            </div>
+            
+            <h2>Cadastrar Técnico</h2>
             
             <div class="grid-2">
                 <div class="form-group">
@@ -277,7 +178,6 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
                         <option value="refrigeracao">Refrigeração</option>
                         <option value="lavanderia">Máquina de Lavar</option>
                         <option value="marcenaria">Marcenaria</option>
-                        <option value="todos">Todos os serviços</option>
                     </select>
                 </div>
             </div>
@@ -285,61 +185,42 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
             <div class="form-group">
                 <label>WhatsApp do Técnico (com DDD):</label>
                 <input type="text" id="whatsappTecnico" placeholder="11999999999">
-                <div class="dica">Apenas números, com DDD. Ex: 11999999999</div>
             </div>
             
-            <button class="salvar" onclick="salvarTecnico()">💾 Salvar Técnico</button>
+            <button class="salvar" onclick="salvarTecnico()" id="btnSalvarTecnico">💾 Salvar Técnico</button>
             
             <div class="lista" id="listaTecnicos">
                 <h3>Técnicos Cadastrados:</h3>
-                <div id="conteudoTecnicos">Carregando...</div>
+                <div id="conteudoTecnicos"><div class="loading">Carregando...</div></div>
             </div>
         </div>
 
-        <!-- ABA 5: CONFIGURAÇÕES -->
+        <!-- ABA CONFIGURAÇÕES -->
         <div id="config" class="secao">
             <h2>⚙️ Configurações do Sistema</h2>
             
             <div class="form-group">
-                <label>🔑 Token do Bot Telegram (para avisos):</label>
-                <input type="text" id="tokenTelegram" placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
-                <div class="dica">Pegue com @BotFather no Telegram</div>
+                <label>🤖 Token do Bot Telegram (opcional):</label>
+                <input type="text" id="tokenTelegram" placeholder="123456789:ABC...">
             </div>
             
             <div class="form-group">
-                <label>👥 ID do Grupo Telegram (para avisos):</label>
+                <label>👥 ID do Grupo Telegram (opcional):</label>
                 <input type="text" id="chatIdTelegram" placeholder="-1001234567890">
-                <div class="dica">Crie um grupo, adicione o bot, envie /start</div>
-            </div>
-            
-            <div class="form-group">
-                <label>🏢 Nome da sua Empresa:</label>
-                <input type="text" id="nomeEmpresa" placeholder="Sua Empresa">
-            </div>
-            
-            <div class="form-group">
-                <label>📞 Telefone de Contato (backup):</label>
-                <input type="text" id="telefoneEmpresa" placeholder="(11) 99999-9999">
             </div>
             
             <button class="salvar" onclick="salvarConfig()">💾 Salvar Configurações</button>
         </div>
     </div>
 
-    <!-- Link para página de intervenção -->
     <a href="/intervencao.html" class="link-intervencao">🚨 Ir para Intervenção</a>
 
     <div id="status" class="status"></div>
 
     <script>
-        // CONFIGURAÇÃO - SUBSTITUA PELOS SEUS DADOS
+        // SUA CHAVE DO SUPABASE (JÁ CONFIGURADA)
         const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // ⬅️ COLE SUA CHAVE AQUI!
-
-        // Verifica se a chave foi configurada
-        if (SUPABASE_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVocGlrbXFyaWVsZHBsd2tteXlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzkzMjIsImV4cCI6MjA4OTcxNTMyMn0.7q5-vcJfzqjcaiiuvDg1kMGFmWEH07bBscqKH85DN0c') {
-            alert('⚠️ IMPORTANTE: Edite o arquivo e coloque sua chave do Supabase na linha 305!\n\nPegue em: Project Settings → API → anon public');
-        }
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVocGlrbXFyaWVsZHBsd2tteXlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzkzMjIsImV4cCI6MjA4OTcxNTMyMn0.7q5-vcJfzqjcaiiuvDg1kMGFmWEH07bBscqKH85DN0c';
 
         function mostrarSecao(nome) {
             document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
@@ -347,103 +228,8 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
             document.getElementById(nome).classList.add('ativa');
             event.target.classList.add('ativo');
             
-            // Carrega dados da seção
-            if (nome === 'respostas') carregarRespostas();
             if (nome === 'precos') carregarPrecos();
             if (nome === 'tecnicos') carregarTecnicos();
-        }
-
-        // ========== RESPOSTAS ==========
-        async function salvarResposta() {
-            const palavras = document.getElementById('palavras').value.trim();
-            const resposta = document.getElementById('resposta').value.trim();
-            
-            if (!palavras || !resposta) {
-                mostrarStatus('Preencha todos os campos!', true);
-                return;
-            }
-
-            try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/respostas`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({
-                        palavras_chave: palavras,
-                        resposta: resposta,
-                        created_at: new Date().toISOString()
-                    })
-                });
-
-                if (!res.ok) throw new Error('Erro ao salvar');
-
-                mostrarStatus('✅ Resposta salva com sucesso!');
-                document.getElementById('palavras').value = '';
-                document.getElementById('resposta').value = '';
-                carregarRespostas();
-            } catch (erro) {
-                mostrarStatus('❌ Erro ao salvar: ' + erro.message, true);
-                console.error(erro);
-            }
-        }
-
-        async function carregarRespostas() {
-            try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/respostas?select=*&order=created_at.desc`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
-                
-                if (!res.ok) throw new Error('Erro ao carregar');
-                
-                const dados = await res.json();
-                
-                const div = document.getElementById('conteudoRespostas');
-                if (dados.length === 0) {
-                    div.innerHTML = '<p style="color: #999;">Nenhuma resposta cadastrada ainda.</p>';
-                    return;
-                }
-
-                div.innerHTML = dados.map(r => `
-                    <div class="item">
-                        <div>
-                            <strong>Palavras:</strong> ${r.palavras_chave}<br>
-                            <small>${r.resposta.substring(0, 100)}${r.resposta.length > 100 ? '...' : ''}</small>
-                        </div>
-                        <button onclick="excluirResposta(${r.id})">Excluir</button>
-                    </div>
-                `).join('');
-            } catch (erro) {
-                document.getElementById('conteudoRespostas').innerHTML = 
-                    '<p style="color: red;">Erro ao carregar. Verifique a chave do Supabase.</p>';
-            }
-        }
-
-        async function excluirResposta(id) {
-            if (!confirm('Tem certeza?')) return;
-            
-            await fetch(`${SUPABASE_URL}/rest/v1/respostas?id=eq.${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
-            });
-            
-            carregarRespostas();
-        }
-
-        // ========== SCRIPTS (FLUXO) ==========
-        async function salvarScripts() {
-            // Aqui você pode salvar em uma tabela 'scripts' se quiser
-            // Por enquanto, apenas mostra mensagem
-            mostrarStatus('✅ Scripts salvos (funcionalidade em desenvolvimento)');
         }
 
         // ========== PREÇOS ==========
@@ -453,9 +239,13 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
             const valor = parseFloat(document.getElementById('valorVisita').value);
 
             if (!bairro || !valor) {
-                mostrarStatus('Preencha todos os campos!', true);
+                mostrarStatus('❌ Preencha bairro e valor!', true);
                 return;
             }
+
+            const btn = document.getElementById('btnSalvarPreco');
+            btn.disabled = true;
+            btn.textContent = 'Salvando...';
 
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/precos`, {
@@ -469,14 +259,17 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
                     body: JSON.stringify({ bairro, servico, valor })
                 });
 
-                if (!res.ok) throw new Error('Erro ao salvar');
+                if (!res.ok) throw new Error(await res.text());
 
-                mostrarStatus('✅ Preço salvo!');
+                mostrarStatus('✅ Preço salvo com sucesso!');
                 document.getElementById('bairroPreco').value = '';
                 document.getElementById('valorVisita').value = '';
                 carregarPrecos();
             } catch (erro) {
-                mostrarStatus('❌ Erro: ' + erro.message, true);
+                mostrarStatus('❌ Erro ao salvar: ' + erro.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '💾 Salvar Preço';
             }
         }
 
@@ -488,26 +281,27 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
                         'Authorization': `Bearer ${SUPABASE_KEY}`
                     }
                 });
-                
+
                 const dados = await res.json();
                 const div = document.getElementById('conteudoPrecos');
-                
+
                 if (dados.length === 0) {
-                    div.innerHTML = '<p style="color: #999;">Nenhum preço cadastrado.</p>';
+                    div.innerHTML = '<p style="color: #999;">Nenhum preço cadastrado ainda.</p>';
                     return;
                 }
 
                 div.innerHTML = dados.map(p => `
                     <div class="item">
                         <div>
-                            <strong>${p.bairro}</strong> - ${p.servico}<br>
-                            <small>Visita: R$ ${p.valor}</small>
+                            <strong>${p.bairro}</strong><br>
+                            <small>${p.servico} - R$ ${p.valor.toFixed(2)}</small>
                         </div>
                         <button onclick="excluirPreco(${p.id})">Excluir</button>
                     </div>
                 `).join('');
             } catch (erro) {
-                document.getElementById('conteudoPrecos').innerHTML = '<p style="color: red;">Erro ao carregar.</p>';
+                document.getElementById('conteudoPrecos').innerHTML = 
+                    `<div class="erro-msg">Erro: ${erro.message}</div>`;
             }
         }
 
@@ -520,6 +314,7 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
                     'Authorization': `Bearer ${SUPABASE_KEY}`
                 }
             });
+            mostrarStatus('✅ Excluído!');
             carregarPrecos();
         }
 
@@ -530,9 +325,13 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
             const whatsapp = document.getElementById('whatsappTecnico').value.trim();
 
             if (!nome || !whatsapp) {
-                mostrarStatus('Preencha todos os campos!', true);
+                mostrarStatus('❌ Preencha nome e WhatsApp!', true);
                 return;
             }
+
+            const btn = document.getElementById('btnSalvarTecnico');
+            btn.disabled = true;
+            btn.textContent = 'Salvando...';
 
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/tecnicos`, {
@@ -546,7 +345,7 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
                     body: JSON.stringify({ nome, especialidade, whatsapp })
                 });
 
-                if (!res.ok) throw new Error('Erro ao salvar');
+                if (!res.ok) throw new Error(await res.text());
 
                 mostrarStatus('✅ Técnico salvo!');
                 document.getElementById('nomeTecnico').value = '';
@@ -554,6 +353,9 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
                 carregarTecnicos();
             } catch (erro) {
                 mostrarStatus('❌ Erro: ' + erro.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '💾 Salvar Técnico';
             }
         }
 
@@ -565,10 +367,10 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
                         'Authorization': `Bearer ${SUPABASE_KEY}`
                     }
                 });
-                
+
                 const dados = await res.json();
                 const div = document.getElementById('conteudoTecnicos');
-                
+
                 if (dados.length === 0) {
                     div.innerHTML = '<p style="color: #999;">Nenhum técnico cadastrado.</p>';
                     return;
@@ -584,7 +386,8 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
                     </div>
                 `).join('');
             } catch (erro) {
-                document.getElementById('conteudoTecnicos').innerHTML = '<p style="color: red;">Erro ao carregar.</p>';
+                document.getElementById('conteudoTecnicos').innerHTML = 
+                    `<div class="erro-msg">Erro: ${erro.message}</div>`;
             }
         }
 
@@ -597,18 +400,18 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
                     'Authorization': `Bearer ${SUPABASE_KEY}`
                 }
             });
+            mostrarStatus('✅ Excluído!');
             carregarTecnicos();
         }
 
         // ========== CONFIGURAÇÕES ==========
-        async function salvarConfig() {
-            const token = document.getElementById('tokenTelegram').value;
-            const chatId = document.getElementById('chatIdTelegram').value;
-            const empresa = document.getElementById('nomeEmpresa').value;
-            const telefone = document.getElementById('telefoneEmpresa').value;
-
-            // Salva no localStorage por enquanto (pode melhorar depois)
-            localStorage.setItem('config', JSON.stringify({ token, chatId, empresa, telefone }));
+        function salvarConfig() {
+            const token = document.getElementById('tokenTelegram').value.trim();
+            const chatId = document.getElementById('chatIdTelegram').value.trim();
+            
+            if (token) localStorage.setItem('telegram_token', token);
+            if (chatId) localStorage.setItem('telegram_chat', chatId);
+            
             mostrarStatus('✅ Configurações salvas!');
         }
 
@@ -617,12 +420,15 @@ Ou se preferir, ligue direto: (11) 99999-9999</textarea>
             div.textContent = msg;
             div.className = 'status ' + (erro ? 'erro' : 'sucesso');
             div.style.display = 'block';
-            setTimeout(() => div.style.display = 'none', 3000);
+            setTimeout(() => div.style.display = 'none', 4000);
         }
 
         // Carrega ao abrir
         window.onload = () => {
-            carregarRespostas();
+            document.getElementById('tokenTelegram').value = localStorage.getItem('telegram_token') || '';
+            document.getElementById('chatIdTelegram').value = localStorage.getItem('telegram_chat') || '';
+            carregarPrecos();
+            carregarTecnicos();
         };
     </script>
 </body>
