@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Treinar Robô - Painel Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f2f5; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #1a73e8; margin-bottom: 10px; }
+        .subtitulo { color: #666; margin-bottom: 30px; }
+        .aba { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .aba button { padding: 10px 20px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 5px 5px 0 0; }
+        .aba button.ativa { background: #1a73e8; color: white; }
+        .secao { display: none; }
+        .secao.ativa { display: block; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        textarea { min-height: 100px; resize: vertical; }
+        button.salvar { background: #0f9d58; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
+        button.salvar:hover { background: #0b8043; }
+        .lista { margin-top: 20px; }
+        .item { background: #f8f9fa; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .item button { background: #ea4335; color: white; border: none; padding: 5px 15px; border-radius: 3px; cursor: pointer; }
+        .status { padding: 20px; background: #e8f5e9; border-radius: 5px; margin-top: 20px; display: none; }
+        .status.erro { background: #ffebee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Painel de Treinamento do Robô</h1>
+        <p class="subtitulo">Ensine o robô como atender seus clientes</p>
+
+        <div class="aba">
+            <button class="ativa" onclick="mostrarSecao('precos')">💰 Preços por Bairro</button>
+            <button onclick="mostrarSecao('tecnicos')">👨‍🔧 Técnicos</button>
+            <button onclick="mostrarSecao('respostas')">💬 Respostas do Robô</button>
+        </div>
+
+        <!-- ABA PREÇOS -->
+        <div id="precos" class="secao ativa">
+            <h2>Cadastrar Preço de Visita</h2>
+            <div class="form-group">
+                <label>Bairro:</label>
+                <input type="text" id="bairro" placeholder="Ex: Centro, Jardins, Vila Mariana...">
+            </div>
+            <div class="form-group">
+                <label>Serviço:</label>
+                <select id="servico">
+                    <option value="refrigeracao">Refrigeração</option>
+                    <option value="lavanderia">Máquina de Lavar</option>
+                    <option value="marcenaria">Marcenaria</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Valor da Visita (R$):</label>
+                <input type="number" id="valor" placeholder="60,00" step="0.01">
+            </div>
+            <button class="salvar" onclick="salvarPreco()">💾 Salvar Preço</button>
+            
+            <div class="lista" id="listaPrecos">
+                <h3>Preços Cadastrados:</h3>
+                <!-- Vai preencher do Supabase -->
+                <p>Carregando...</p>
+            </div>
+        </div>
+
+        <!-- ABA TÉCNICOS -->
+        <div id="tecnicos" class="secao">
+            <h2>Cadastrar Técnico</h2>
+            <div class="form-group">
+                <label>Nome do Técnico:</label>
+                <input type="text" id="nomeTecnico" placeholder="Ex: João Silva">
+            </div>
+            <div class="form-group">
+                <label>Especialidade:</label>
+                <select id="especialidade">
+                    <option value="refrigeracao">Refrigeração</option>
+                    <option value="lavanderia">Máquina de Lavar</option>
+                    <option value="marcenaria">Marcenaria</option>
+                    <option value="todos">Todos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>WhatsApp do Técnico:</label>
+                <input type="text" id="whatsappTecnico" placeholder="11999999999">
+            </div>
+            <button class="salvar" onclick="salvarTecnico()">💾 Salvar Técnico</button>
+            
+            <div class="lista" id="listaTecnicos">
+                <h3>Técnicos Cadastrados:</h3>
+                <p>Carregando...</p>
+            </div>
+        </div>
+
+        <!-- ABA RESPOSTAS -->
+        <div id="respostas" class="secao">
+            <h2>Personalizar Respostas do Robô</h2>
+            <div class="form-group">
+                <label>Quando cliente diz "Oi":</label>
+                <textarea id="respostaOi">Olá! 👋 Sou a atendente virtual. Posso ajudar com:\n\n• Refrigeração\n• Máquina de lavar\n• Marcenaria\n\nQual serviço você precisa?</textarea>
+            </div>
+            <div class="form-group">
+                <label>Quando pede preço:</label>
+                <textarea id="respostaPreco">Os valores dependem do bairro! 📍\n\nMe diga seu bairro que consulto na hora:\n• Visita técnica: a partir de R$ 50\n• Orçamento: grátis na visita\n\nQual seu bairro?</textarea>
+            </div>
+            <button class="salvar" onclick="salvarRespostas()">💾 Salvar Respostas</button>
+        </div>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+        // Configuração do Supabase (vamos substituir pelos seus dados)
+        const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
+        const SUPABASE_KEY = 'sua-chave-anon-public';
+
+        function mostrarSecao(nome) {
+            document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
+            document.querySelectorAll('.aba button').forEach(b => b.classList.remove('ativa'));
+            document.getElementById(nome).classList.add('ativa');
+            event.target.classList.add('ativa');
+        }
+
+        async function salvarPreco() {
+            const dados = {
+                bairro: document.getElementById('bairro').value,
+                servico: document.getElementById('servico').value,
+                valor: parseFloat(document.getElementById('valor').value)
+            };
+            
+            // Aqui vai salvar no Supabase
+            mostrarStatus('Preço salvo com sucesso! ✅', false);
+            carregarPrecos();
+        }
+
+        function mostrarStatus(msg, erro) {
+            const div = document.getElementById('status');
+            div.textContent = msg;
+            div.className = 'status' + (erro ? ' erro' : '');
+            div.style.display = 'block';
+            setTimeout(() => div.style.display = 'none', 3000);
+        }
+
+        async function carregarPrecos() {
+            // Busca do Supabase e mostra na lista
+            document.getElementById('listaPrecos').innerHTML = `
+                <h3>Preços Cadastrados:</h3>
+                <div class="item">
+                    <span><strong>Centro</strong> - Refrigeração: R$ 60,00</span>
+                    <button onclick="excluir(this)">Excluir</button>
+                </div>
+            `;
+        }
+
+        function excluir(btn) {
+            btn.parentElement.remove();
+        }
+
+        // Carrega dados ao abrir
+        carregarPrecos();
+    </script>
+</body>
+</html>
