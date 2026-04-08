@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Intervenção - Atendimento Humano</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #ffebee; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { color: #c62828; margin-bottom: 10px; }
+        .aviso { background: #ffcdd2; padding: 15px; border-radius: 5px; margin-bottom: 20px; color: #c62828; }
+        .chat { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }
+        .chat-header { background: #c62828; color: white; padding: 20px; }
+        .chat-body { height: 400px; overflow-y: auto; padding: 20px; background: #f5f5f5; }
+        .mensagem { margin-bottom: 15px; display: flex; }
+        .mensagem.cliente { justify-content: flex-start; }
+        .mensagem.robo { justify-content: flex-end; }
+        .bubble { max-width: 70%; padding: 12px 15px; border-radius: 15px; }
+        .cliente .bubble { background: white; border: 1px solid #ddd; }
+        .robo .bubble { background: #e3f2fd; color: #1565c0; }
+        .info { font-size: 12px; color: #999; margin-top: 5px; }
+        .chat-footer { padding: 20px; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        .chat-footer textarea { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 5px; resize: none; height: 60px; }
+        .chat-footer button { background: #c62828; color: white; border: none; padding: 0 30px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .chat-footer button:hover { background: #b71c1c; }
+        .lista-chamados { display: grid; gap: 10px; margin-bottom: 20px; }
+        .chamado { background: white; padding: 15px; border-radius: 5px; cursor: pointer; border-left: 4px solid #ccc; }
+        .chamado.ativo { border-left-color: #c62828; background: #ffebee; }
+        .chamado.novo { border-left-color: #0f9d58; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { background: #e8f5e9; } 50% { background: white; } }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px; }
+        .badge.novo { background: #0f9d58; color: white; }
+        .badge.andamento { background: #f9a825; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Central de Intervenção</h1>
+        <div class="aviso">
+            ⚠️ <strong>Atenção:</strong> O robô pediu ajuda nos atendimentos abaixo. Responda rapidamente!
+        </div>
+
+        <div class="lista-chamados" id="listaChamados">
+            <!-- Preenche automaticamente do Supabase -->
+            <div class="chamado novo" onclick="abrirChat('11999999999', 'Maria Silva')">
+                <strong>Maria Silva</strong> <span class="badge novo">NOVO</span>
+                <div style="color: #666; font-size: 14px; margin-top: 5px;">
+                    "Quero saber se vocês fazem conserto de freezer industrial..."
+                </div>
+                <div style="color: #999; font-size: 12px; margin-top: 5px;">
+                    Chegou há 2 minutos • Tel: 11999999999
+                </div>
+            </div>
+            
+            <div class="chamado" onclick="abrirChat('11888888888', 'João Pedro')">
+                <strong>João Pedro</strong> <span class="badge andamento">Em andamento</span>
+                <div style="color: #666; font-size: 14px; margin-top: 5px;">
+                    "O técnico pode vir depois das 18h?"
+                </div>
+                <div style="color: #999; font-size: 12px; margin-top: 5px;">
+                    Aguardando resposta • Tel: 11888888888
+                </div>
+            </div>
+        </div>
+
+        <div class="chat" id="chatAtivo" style="display: none;">
+            <div class="chat-header">
+                <h3 id="nomeCliente">Cliente</h3>
+                <small id="telefoneCliente">11999999999</small>
+            </div>
+            <div class="chat-body" id="corpoChat">
+                <div class="mensagem cliente">
+                    <div>
+                        <div class="bubble">Quero saber se vocês fazem conserto de freezer industrial da marca X</div>
+                        <div class="info">Cliente - 14:32</div>
+                    </div>
+                </div>
+                <div class="mensagem robo">
+                    <div>
+                        <div class="bubble">Hmm, essa pergunta é mais específica... 🤔 Deixa eu chamar minha supervisora!</div>
+                        <div class="info">Robô - 14:33</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-footer">
+                <textarea id="respostaHumana" placeholder="Digite sua resposta aqui..."></textarea>
+                <button onclick="enviarResposta()">Enviar 📤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let clienteAtual = { telefone: '', nome: '' };
+
+        function abrirChat(telefone, nome) {
+            clienteAtual = { telefone, nome };
+            document.getElementById('nomeCliente').textContent = nome;
+            document.getElementById('telefoneCliente').textContent = telefone;
+            document.getElementById('chatAtivo').style.display = 'block';
+            document.getElementById('corpoChat').scrollTop = document.getElementById('corpoChat').scrollHeight;
+        }
+
+        async function enviarResposta() {
+            const texto = document.getElementById('respostaHumana').value;
+            if (!texto.trim()) return;
+
+            // Adiciona na tela
+            const div = document.createElement('div');
+            div.className = 'mensagem robo';
+            div.innerHTML = `
+                <div>
+                    <div class="bubble">${texto}</div>
+                    <div class="info">Você - ${new Date().toLocaleTimeString()}</div>
+                </div>
+            `;
+            document.getElementById('corpoChat').appendChild(div);
+            document.getElementById('respostaHumana').value = '';
+            
+            // Aqui envia pro WhatsApp via API
+            await fetch('/api/resposta', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    telefone: clienteAtual.telefone,
+                    mensagem: texto
+                })
+            });
+
+            // Atualiza no Supabase que foi atendido
+        }
+
+        // Atualiza lista a cada 10 segundos
+        setInterval(() => {
+            // Busca novas intervenções do Supabase
+            console.log('Verificando novos chamados...');
+        }, 10000);
+    </script>
+</body>
+</html>
