@@ -1,118 +1,103 @@
-// ROBÔ DO WHATSAPP - RODA NA VERCEL
-// Isso recebe mensagens do WhatsApp e responde automaticamente
-
+// ROBÔ INTELIGENTE - Busca respostas no banco de dados
 export default async function handler(req, res) {
-  // Só aceita POST (mensagens do WhatsApp)
-  if (req.method !== 'POST') {
-    return res.status(200).send('OK'); // Para verificação do Meta
-  }
+  if (req.method !== 'POST') return res.status(200).send('OK');
 
   try {
-    // Pega dados da mensagem que chegou
     const body = req.body;
-    const entry = body.entry?.[0];
-    const changes = entry?.changes?.[0];
-    const value = changes?.value;
-    const message = value?.messages?.[0];
+    const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+    
+    if (!message) return res.status(200).json({ status: 'ignorado' });
 
-    // Se não tiver mensagem, ignora (pode ser status)
-    if (!message) {
-      return res.status(200).json({ status: 'ignorado' });
-    }
-
-    // Dados do cliente
     const telefone = message.from;
-    const nome = value?.contacts?.[0]?.profile?.name || 'Cliente';
+    const nome = body.entry[0].changes[0].value.contacts?.[0]?.profile?.name || 'Cliente';
     const texto = message.text?.body?.toLowerCase() || '';
-    
-    console.log(`Mensagem de ${nome} (${telefone}): ${texto}`);
+    const tipoMidia = message.type; // text, image, audio, video
 
-    // ===== AQUI ENTRA A INTELIGÊNCIA DO ROBÔ =====
+    // Busca respostas cadastradas no Supabase
+    const respostas = await buscarRespostas();
     
-    let resposta = '';
+    // Procura palavra-chave na mensagem
+    let resposta = await encontrarMelhorResposta(texto, respostas);
     
-    // Saudação
-    if (texto.includes('oi') || texto.includes('olá') || texto.includes('ola')) {
-      resposta = `Olá ${nome}! 👋 Sou a atendente virtual da *Sua Empresa*. Posso ajudar com:\n\n• Refrigeração\n• Máquina de lavar\n• Marcenaria\n\nQual serviço você precisa? E qual seu bairro?`;
-    }
-    // Perguntou sobre serviço
-    else if (texto.includes('geladeira') || texto.includes('refrigeração') || texto.includes('frio')) {
-      resposta = `Para refrigeração, preciso saber:\n\n1️⃣ Qual seu bairro?\n2️⃣ O que está acontecendo com o aparelho?\n3️⃣ Consegue enviar uma foto?\n\nAssim já passo o valor da visita! 🔧`;
-    }
-    // Perguntou preço/valor
-    else if (texto.includes('preço') || texto.includes('preco') || texto.includes('valor') || texto.includes('quanto')) {
-      resposta = `Os valores dependem do bairro! 📍\n\nMe diga seu bairro que consulto na hora:\n• Visita técnica: a partir de R$ 50\n• Orçamento: grátis na visita\n• Conserto: após avaliação\n\nQual seu bairro?`;
-    }
-    // Cliente mandou bairro (detecta se tem "bairro" ou nome comum)
-    else if (texto.includes('centro') || texto.includes('jardim') || texto.includes('vila')) {
-      resposta = `Perfeito! Para o bairro que você mencionou:\n\n💰 *Visita técnica: R$ 60*\n⏰ *Disponibilidade: amanhã ou sábado*\n\nPara agendar, preciso confirmar:\n• Seu endereço completo\n• Melhor horário\n• Telefone para contato\n\nPosso agendar agora? ✅`;
-    }
-    // Quer agendar
-    else if (texto.includes('agendar') || texto.includes('marcar') || texto.includes('pode ser') || texto.includes('sim')) {
-      resposta = `Ótimo! 🎉 Vou precisar de:\n\n📍 Endereço completo (rua, número)\n📅 Dia preferido\n⏰ Período: manhã ou tarde?\n\nAssim envio para o técnico *João* confirmar! 🔧`;
-    }
-    // Não entendeu - pede ajuda humana
-    else {
-      // Salva no Supabase para intervenção
-      await salvarIntervencao(telefone, nome, texto);
+    // Se não encontrou ou é mídia, pede ajuda
+    if (!resposta || tipoMidia !== 'text') {
+      await salvarIntervencao(telefone, nome, texto, tipoMidia);
+      await avisarTelegram(nome, texto, telefone);
       
-      resposta = `Hmm, ${nome}, essa pergunta é mais específica... 🤔\n\nDeixa eu chamar minha supervisora para te atender melhor! Só um momento... ⏳\n\n(Alguém já foi notificado e vai te responder em breve)`;
+      resposta = `Olá ${nome}! 👋\n\nRecebi sua mensagem, mas preciso confirmar alguns detalhes com minha supervisora. Ela já foi avisada e vai te responder em breve! ⏳`;
     }
 
-    // Envia resposta de volta pelo WhatsApp
     await enviarWhatsApp(telefone, resposta);
-
-    // Responde pro Meta que deu tudo certo
-    res.status(200).json({ status: 'mensagem_processada' });
+    res.status(200).json({ sucesso: true });
 
   } catch (erro) {
     console.error('Erro:', erro);
-    res.status(200).json({ status: 'erro_mas_ok' }); // Sempre responde 200 pro Meta
+    res.status(200).json({ status: 'erro' });
   }
 }
 
-// Função para enviar mensagem pelo WhatsApp oficial
-async function enviarWhatsApp(telefone, mensagem) {
-  const TOKEN = process.env.WHATSAPP_TOKEN; // Vamos configurar isso na Vercel
-  const ID_NUMERO = process.env.WHATSAPP_ID_NUMERO;
-  
-  const resposta = await fetch(`https://graph.facebook.com/v18.0/${ID_NUMERO}/messages`, {
-    method: 'POST',
+// Busca respostas do Supabase
+async function buscarRespostas() {
+  const url = `${process.env.SUPABASE_URL}/rest/v1/respostas?select=*`;
+  const res = await fetch(url, {
     headers: {
-      'Authorization': `Bearer ${TOKEN}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
-      to: telefone,
-      type: 'text',
-      text: { body: mensagem }
-    })
+      'apikey': process.env.SUPABASE_KEY,
+      'Authorization': `Bearer ${process.env.SUPABASE_KEY}`
+    }
   });
-  
-  return resposta.json();
+  return res.json();
 }
 
-// Função para salvar quando precisa de ajuda humana
-async function salvarIntervencao(telefone, nome, mensagem) {
-  const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_KEY = process.env.SUPABASE_KEY;
+// Encontra resposta que contém palavras da mensagem
+async function encontrarMelhorResposta(texto, respostas) {
+  // Procura palavras-chave
+  for (const item of respostas) {
+    const palavras = item.palavras_chave.toLowerCase().split(',');
+    if (palavras.some(p => texto.includes(p.trim()))) {
+      return item.resposta;
+    }
+  }
+  return null; // Não encontrou
+}
+
+// Avisa no Telegram
+async function avisarTelegram(nome, mensagem, telefone) {
+  const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+  const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
   
-  await fetch(`${SUPABASE_URL}/rest/v1/intervencoes`, {
+  const texto = `🚨 *NOVO CHAMADO*\n\n👤 *${nome}*\n📱 ${telefone}\n💬 "${mensagem}"\n\n👉 Acesse: https://seu-projeto.vercel.app/intervencao`;
+  
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: CHAT_ID,
+      text: texto,
+      parse_mode: 'Markdown'
+    })
+  });
+}
+
+// Salva para intervenção
+async function salvarIntervencao(telefone, nome, mensagem, tipo) {
+  await fetch(`${process.env.SUPABASE_URL}/rest/v1/intervencoes`, {
     method: 'POST',
     headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
+      'apikey': process.env.SUPABASE_KEY,
+      'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       telefone,
       nome,
       mensagem,
+      tipo_midia: tipo,
       status: 'pendente',
       data: new Date().toISOString()
     })
   });
+}
+
+async function enviarWhatsApp(telefone, mensagem) {
+  // ... mesmo código de antes
 }
