@@ -2,126 +2,131 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 Treinar Robô - Painel Admin</title>
+    <title>🤖 Treinar Robô</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #f0f2f5; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { color: #1a73e8; margin-bottom: 10px; }
-        .subtitulo { color: #666; margin-bottom: 30px; }
-        .aba { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
-        .aba button { padding: 10px 20px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 5px 5px 0 0; }
-        .aba button.ativa { background: #1a73e8; color: white; }
-        .secao { display: none; }
-        .secao.ativa { display: block; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
-        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
-        textarea { min-height: 100px; resize: vertical; }
-        button.salvar { background: #0f9d58; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
-        button.salvar:hover { background: #0b8043; }
-        .lista { margin-top: 20px; }
-        .item { background: #f8f9fa; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
-        .item button { background: #ea4335; color: white; border: none; padding: 5px 15px; border-radius: 3px; cursor: pointer; }
-        .status { padding: 20px; background: #e8f5e9; border-radius: 5px; margin-top: 20px; display: none; }
-        .status.erro { background: #ffebee; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: #1a73e8; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card h2 { margin-bottom: 15px; color: #333; font-size: 18px; }
+        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        textarea { min-height: 80px; }
+        button { background: #1a73e8; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; width: 100%; }
+        button:hover { background: #1557b0; }
+        .lista { margin-top: 15px; max-height: 300px; overflow-y: auto; }
+        .item { background: #f8f9fa; padding: 10px; margin-bottom: 8px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .item button { width: auto; background: #ea4335; padding: 5px 10px; font-size: 12px; }
+        .status { position: fixed; top: 20px; right: 20px; padding: 15px; border-radius: 5px; color: white; display: none; }
+        .status.sucesso { background: #0f9d58; }
+        .status.erro { background: #ea4335; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🤖 Painel de Treinamento do Robô</h1>
-        <p class="subtitulo">Ensine o robô como atender seus clientes</p>
-
-        <div class="aba">
-            <button class="ativa" onclick="mostrarSecao('precos')">💰 Preços por Bairro</button>
-            <button onclick="mostrarSecao('tecnicos')">👨‍🔧 Técnicos</button>
-            <button onclick="mostrarSecao('respostas')">💬 Respostas do Robô</button>
-        </div>
-
-        <!-- ABA PREÇOS -->
-        <div id="precos" class="secao ativa">
-            <h2>Cadastrar Preço de Visita</h2>
-            <div class="form-group">
-                <label>Bairro:</label>
-                <input type="text" id="bairro" placeholder="Ex: Centro, Jardins, Vila Mariana...">
+        <h1>🤖 Painel de Treinamento</h1>
+        
+        <div class="grid">
+            <!-- TREINAR RESPOSTAS -->
+            <div class="card">
+                <h2>💬 Ensinar Robô a Responder</h2>
+                <input type="text" id="palavras" placeholder="Palavras-chave (separe por vírgula): oi, olá, ola">
+                <textarea id="resposta" placeholder="Resposta do robô..."></textarea>
+                <button onclick="salvarResposta()">💾 Salvar Resposta</button>
+                
+                <div class="lista" id="listaRespostas">
+                    <!-- Preenche do banco -->
+                </div>
             </div>
-            <div class="form-group">
-                <label>Serviço:</label>
+
+            <!-- PREÇOS -->
+            <div class="card">
+                <h2>💰 Preços por Bairro</h2>
+                <input type="text" id="bairro" placeholder="Nome do bairro">
                 <select id="servico">
                     <option value="refrigeracao">Refrigeração</option>
                     <option value="lavanderia">Máquina de Lavar</option>
                     <option value="marcenaria">Marcenaria</option>
                 </select>
+                <input type="number" id="valor" placeholder="Valor da visita (R$)" step="0.01">
+                <button onclick="salvarPreco()">💾 Salvar Preço</button>
+                
+                <div class="lista" id="listaPrecos"></div>
             </div>
-            <div class="form-group">
-                <label>Valor da Visita (R$):</label>
-                <input type="number" id="valor" placeholder="60,00" step="0.01">
-            </div>
-            <button class="salvar" onclick="salvarPreco()">💾 Salvar Preço</button>
-            
-            <div class="lista" id="listaPrecos">
-                <h3>Preços Cadastrados:</h3>
-                <!-- Vai preencher do Supabase -->
-                <p>Carregando...</p>
-            </div>
-        </div>
 
-        <!-- ABA TÉCNICOS -->
-        <div id="tecnicos" class="secao">
-            <h2>Cadastrar Técnico</h2>
-            <div class="form-group">
-                <label>Nome do Técnico:</label>
-                <input type="text" id="nomeTecnico" placeholder="Ex: João Silva">
-            </div>
-            <div class="form-group">
-                <label>Especialidade:</label>
-                <select id="especialidade">
+            <!-- TÉCNICOS -->
+            <div class="card">
+                <h2>👨‍🔧 Cadastrar Técnicos</h2>
+                <input type="text" id="nomeTec" placeholder="Nome do técnico">
+                <select id="espTec">
                     <option value="refrigeracao">Refrigeração</option>
                     <option value="lavanderia">Máquina de Lavar</option>
                     <option value="marcenaria">Marcenaria</option>
-                    <option value="todos">Todos</option>
                 </select>
+                <input type="text" id="whatsappTec" placeholder="WhatsApp do técnico">
+                <button onclick="salvarTecnico()">💾 Salvar Técnico</button>
+                
+                <div class="lista" id="listaTecnicos"></div>
             </div>
-            <div class="form-group">
-                <label>WhatsApp do Técnico:</label>
-                <input type="text" id="whatsappTecnico" placeholder="11999999999">
-            </div>
-            <button class="salvar" onclick="salvarTecnico()">💾 Salvar Técnico</button>
-            
-            <div class="lista" id="listaTecnicos">
-                <h3>Técnicos Cadastrados:</h3>
-                <p>Carregando...</p>
+
+            <!-- CONFIGURAÇÕES -->
+            <div class="card">
+                <h2>⚙️ Configurações</h2>
+                <label>Bot Token do Telegram (para avisos):</label>
+                <input type="text" id="tokenTelegram" placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
+                <label>ID do Grupo do Telegram:</label>
+                <input type="text" id="chatIdTelegram" placeholder="-1001234567890">
+                <button onclick="salvarConfig()">💾 Salvar Configurações</button>
             </div>
         </div>
-
-        <!-- ABA RESPOSTAS -->
-        <div id="respostas" class="secao">
-            <h2>Personalizar Respostas do Robô</h2>
-            <div class="form-group">
-                <label>Quando cliente diz "Oi":</label>
-                <textarea id="respostaOi">Olá! 👋 Sou a atendente virtual. Posso ajudar com:\n\n• Refrigeração\n• Máquina de lavar\n• Marcenaria\n\nQual serviço você precisa?</textarea>
-            </div>
-            <div class="form-group">
-                <label>Quando pede preço:</label>
-                <textarea id="respostaPreco">Os valores dependem do bairro! 📍\n\nMe diga seu bairro que consulto na hora:\n• Visita técnica: a partir de R$ 50\n• Orçamento: grátis na visita\n\nQual seu bairro?</textarea>
-            </div>
-            <button class="salvar" onclick="salvarRespostas()">💾 Salvar Respostas</button>
-        </div>
-
-        <div id="status" class="status"></div>
     </div>
 
-    <script>
-        // Configuração do Supabase (vamos substituir pelos seus dados)
-        const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
-        const SUPABASE_KEY = 'sua-chave-anon-public';
+    <div id="status" class="status"></div>
 
-        function mostrarSecao(nome) {
-            document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
-            document.querySelectorAll('.aba button').forEach(b => b.classList.remove('ativa'));
-            document.getElementById(nome).classList.add('ativa');
-            event.target.classList.add('ativa');
+    <script>
+        const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
+        const SUPABASE_KEY = 'sua-chave-anon';
+
+        // Carrega dados ao abrir
+        window.onload = () => {
+            carregarRespostas();
+            carregarPrecos();
+            carregarTecnicos();
+        };
+
+        async function salvarResposta() {
+            const dados = {
+                palavras_chave: document.getElementById('palavras').value,
+                resposta: document.getElementById('resposta').value
+            };
+            
+            await fetch(`${SUPABASE_URL}/rest/v1/respostas`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dados)
+            });
+            
+            mostrarStatus('Resposta salva! ✅');
+            carregarRespostas();
+        }
+
+        async function carregarRespostas() {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/respostas?select=*`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const dados = await res.json();
+            
+            document.getElementById('listaRespostas').innerHTML = dados.map(r => `
+                <div class="item">
+                    <span><b>${r.palavras_chave}</b>: ${r.resposta.substring(0, 50)}...</span>
+                    <button onclick="excluir('respostas', ${r.id})">Excluir</button>
+                </div>
+            `).join('');
         }
 
         async function salvarPreco() {
@@ -131,36 +136,90 @@
                 valor: parseFloat(document.getElementById('valor').value)
             };
             
-            // Aqui vai salvar no Supabase
-            mostrarStatus('Preço salvo com sucesso! ✅', false);
+            await fetch(`${SUPABASE_URL}/rest/v1/precos`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dados)
+            });
+            
+            mostrarStatus('Preço salvo! ✅');
             carregarPrecos();
         }
 
-        function mostrarStatus(msg, erro) {
+        async function carregarPrecos() {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/precos?select=*`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const dados = await res.json();
+            
+            document.getElementById('listaPrecos').innerHTML = dados.map(p => `
+                <div class="item">
+                    <span>${p.bairro} - ${p.servico}: R$ ${p.valor}</span>
+                    <button onclick="excluir('precos', ${p.id})">Excluir</button>
+                </div>
+            `).join('');
+        }
+
+        async function salvarTecnico() {
+            const dados = {
+                nome: document.getElementById('nomeTec').value,
+                especialidade: document.getElementById('espTec').value,
+                whatsapp: document.getElementById('whatsappTec').value
+            };
+            
+            await fetch(`${SUPABASE_URL}/rest/v1/tecnicos`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dados)
+            });
+            
+            mostrarStatus('Técnico salvo! ✅');
+            carregarTecnicos();
+        }
+
+        async function carregarTecnicos() {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/tecnicos?select=*`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const dados = await res.json();
+            
+            document.getElementById('listaTecnicos').innerHTML = dados.map(t => `
+                <div class="item">
+                    <span>${t.nome} (${t.especialidade}) - ${t.whatsapp}</span>
+                    <button onclick="excluir('tecnicos', ${t.id})">Excluir</button>
+                </div>
+            `).join('');
+        }
+
+        async function excluir(tabela, id) {
+            await fetch(`${SUPABASE_URL}/rest/v1/${tabela}?id=eq.${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            mostrarStatus('Excluído! 🗑️');
+            if(tabela === 'respostas') carregarRespostas();
+            if(tabela === 'precos') carregarPrecos();
+            if(tabela === 'tecnicos') carregarTecnicos();
+        }
+
+        function mostrarStatus(msg) {
             const div = document.getElementById('status');
             div.textContent = msg;
-            div.className = 'status' + (erro ? ' erro' : '');
+            div.className = 'status sucesso';
             div.style.display = 'block';
             setTimeout(() => div.style.display = 'none', 3000);
         }
-
-        async function carregarPrecos() {
-            // Busca do Supabase e mostra na lista
-            document.getElementById('listaPrecos').innerHTML = `
-                <h3>Preços Cadastrados:</h3>
-                <div class="item">
-                    <span><strong>Centro</strong> - Refrigeração: R$ 60,00</span>
-                    <button onclick="excluir(this)">Excluir</button>
-                </div>
-            `;
-        }
-
-        function excluir(btn) {
-            btn.parentElement.remove();
-        }
-
-        // Carrega dados ao abrir
-        carregarPrecos();
     </script>
 </body>
 </html>
