@@ -320,42 +320,62 @@
             if (tel) setTimeout(() => abrirChat(tel), 600);
         };
 
-        // ==================== CARREGAR CHAMADOS ====================
-        async function carregarChamados() {
-            const div = document.getElementById('listaChamados');
-            try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/intervencoes?status=eq.pendente&order=data.desc`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
+       async function carregarChamados() {
+    const div = document.getElementById('listaChamados');
+    div.innerHTML = '<div class="loading">Carregando chamados...</div>';
 
-                const chamados = await res.json();
-
-                if (chamados.length === 0) {
-                    div.innerHTML = `<div class="empty-state">✅ Nenhum chamado pendente<br><small>O robô está cuidando de tudo</small></div>`;
-                    return;
-                }
-
-                div.innerHTML = chamados.map(c => `
-                    <div class="chamado ${clienteAtual?.telefone === c.telefone ? 'ativo' : ''}" 
-                         onclick="abrirChat('${c.telefone}')">
-                        <div class="chamado-header">
-                            <span class="chamado-nome">${c.nome || 'Cliente'}</span>
-                            <span class="badge pendente">PENDENTE</span>
-                        </div>
-                        <div class="chamado-msg">${c.mensagem || 'Precisa de intervenção'}</div>
-                        <div class="chamado-info">
-                            <span>📱 ${c.telefone}</span>
-                            <span>🕐 ${new Date(c.data).toLocaleTimeString('pt-BR')}</span>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (e) {
-                div.innerHTML = `<div class="erro-msg">❌ Erro ao carregar: ${e.message}</div>`;
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/intervencoes?status=eq.pendente&order=data.desc`, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
             }
+        });
+
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status} - Tabela não encontrada ou chave errada`);
         }
+
+        let chamados = await res.json();
+
+        // 🔥 PROTEÇÃO CONTRA ERRO
+        if (!Array.isArray(chamados)) {
+            chamados = [];
+        }
+
+        if (chamados.length === 0) {
+            div.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">✅</div>
+                    <p>Nenhum chamado pendente!</p>
+                    <small>O robô está resolvendo tudo sozinho</small>
+                </div>`;
+            return;
+        }
+
+        div.innerHTML = chamados.map(c => `
+            <div class="chamado" onclick="abrirChat('${c.telefone}')">
+                <div class="chamado-header">
+                    <span class="chamado-nome">${c.nome || 'Cliente'}</span>
+                    <span class="badge pendente">PENDENTE</span>
+                </div>
+                <div class="chamado-msg">${c.mensagem || 'Precisa de intervenção'}</div>
+                <div class="chamado-info">
+                    <span>📱 ${c.telefone}</span>
+                    <span>🕐 ${new Date(c.data).toLocaleTimeString('pt-BR')}</span>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (e) {
+        div.innerHTML = `
+            <div class="erro-msg">
+                ❌ ${e.message}<br><br>
+                <strong>Provável causa:</strong> A tabela "intervencoes" ainda não existe no Supabase.<br>
+                Rode o SQL que eu te mando abaixo e atualize a página.
+            </div>`;
+    }
+}
 
         // ==================== ABRIR CHAT ====================
         async function abrirChat(telefone) {
