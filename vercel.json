@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "routes": [
+    { "src": "/api/webhook", "dest": "/api/webhook.js" },
+    { "src": "/api/resposta", "dest": "/api/resposta.js" },
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/intervencao", "dest": "/intervencao.html" }
+  ]
+}
