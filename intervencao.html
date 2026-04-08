@@ -1,8 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🚨 Central de Intervenção</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -17,13 +17,18 @@
             align-items: center;
         }
         .header h1 { font-size: 20px; }
-        .header a { color: white; text-decoration: none; background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 5px; }
+        .header a { 
+            color: white; 
+            text-decoration: none; 
+            background: rgba(255,255,255,0.2); 
+            padding: 8px 15px; 
+            border-radius: 5px;
+        }
         
         .container { display: flex; height: calc(100vh - 60px); }
         
-        /* Sidebar */
         .sidebar { 
-            width: 350px; 
+            width: 380px; 
             background: white; 
             border-right: 1px solid #ddd; 
             display: flex;
@@ -34,27 +39,58 @@
             background: #f5f5f5; 
             border-bottom: 1px solid #ddd;
             font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .chamados-list { overflow-y: auto; flex: 1; }
+        .btn-atualizar {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .chamados-list { overflow-y: auto; flex: 1; padding: 10px; }
         .chamado { 
             padding: 15px; 
-            border-bottom: 1px solid #eee; 
+            margin-bottom: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: 0.2s;
+            border-left: 4px solid #ccc;
+            background: #f9f9f9;
         }
-        .chamado:hover { background: #f5f5f5; }
-        .chamado.ativo { background: #ffebee; border-left: 4px solid #c62828; }
-        .chamado.novo { border-left: 4px solid #0f9d58; }
-        .chamado-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .chamado:hover { background: #f0f0f0; }
+        .chamado.ativo { 
+            background: #ffebee; 
+            border-left-color: #c62828;
+        }
+        .chamado.novo { 
+            border-left-color: #0f9d58;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { background: #e8f5e9; }
+            50% { background: #f9f9f9; }
+        }
         .chamado-nome { font-weight: bold; color: #333; }
-        .badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; }
+        .badge { 
+            font-size: 11px; 
+            padding: 3px 10px; 
+            border-radius: 12px;
+            margin-left: 10px;
+        }
         .badge.pendente { background: #ff9800; color: white; }
-        .badge.resolvido { background: #4caf50; color: white; }
-        .chamado-msg { font-size: 13px; color: #666; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .chamado-info { font-size: 11px; color: #999; margin-top: 5px; }
+        .chamado-msg { font-size: 13px; color: #666; margin-top: 5px; }
+        .chamado-info { font-size: 11px; color: #999; margin-top: 8px; }
         
-        /* Chat */
-        .chat-area { flex: 1; display: flex; flex-direction: column; background: #e5ddd5; }
+        .chat-area { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            background: #e5ddd5;
+        }
         .chat-header { 
             background: white; 
             padding: 15px 20px; 
@@ -75,34 +111,27 @@
             gap: 10px;
         }
         .msg { 
-            max-width: 70%; 
+            max-width: 75%; 
             padding: 12px 15px; 
-            border-radius: 15px;
-            position: relative;
-            word-wrap: break-word;
+            border-radius: 12px;
         }
         .msg.cliente { 
             background: white; 
             align-self: flex-start;
-            border-bottom-left-radius: 5px;
+            border-bottom-left-radius: 4px;
         }
         .msg.robo { 
             background: #dcf8c6; 
             align-self: flex-end;
-            border-bottom-right-radius: 5px;
+            border-bottom-right-radius: 4px;
         }
         .msg.humano { 
             background: #fff3e0; 
             align-self: flex-end;
-            border-bottom-right-radius: 5px;
+            border-bottom-right-radius: 4px;
             border: 2px solid #ff9800;
         }
-        .msg-info { 
-            font-size: 11px; 
-            color: #666; 
-            margin-top: 5px;
-            text-align: right;
-        }
+        .msg-info { font-size: 11px; color: #999; margin-top: 5px; text-align: right; }
         
         .chat-input { 
             background: white; 
@@ -115,58 +144,55 @@
             flex: 1; 
             padding: 12px; 
             border: 1px solid #ddd; 
-            border-radius: 5px;
+            border-radius: 8px;
             resize: none;
             height: 60px;
-            font-family: inherit;
         }
         .chat-input button { 
             background: #c62828; 
             color: white; 
             border: none; 
             padding: 0 25px; 
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
         }
-        .chat-input button:hover { background: #b71c1c; }
-        .chat-input button:disabled { background: #ccc; cursor: not-allowed; }
+        .chat-input button:disabled { background: #ccc; }
         
-        /* Envio direto */
         .envio-direto {
             background: white;
-            padding: 15px;
-            border-top: 2px solid #c62828;
+            padding: 15px 20px;
+            border-top: 3px solid #c62828;
         }
-        .envio-direto h4 { margin-bottom: 10px; color: #c62828; font-size: 14px; }
-        .envio-direto-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .envio-direto input, .envio-direto textarea {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .envio-direto input { width: 200px; }
-        .envio-direto textarea { flex: 1; height: 50px; resize: none; }
-        .envio-direto button {
-            background: #1a73e8;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+        .envio-direto h4 { color: #c62828; margin-bottom: 10px; }
+        .envio-direto-row { display: flex; gap: 10px; }
+        .envio-direto input { width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        .envio-direto textarea { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; height: 50px; resize: none; }
+        .envio-direto button { background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
         
         .sem-chamado {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100%;
             color: #999;
-            font-size: 16px;
+            text-align: center;
         }
+        .sem-chamado-icon { font-size: 60px; margin-bottom: 20px; }
         
-        .loading { text-align: center; padding: 20px; color: #999; }
-        .erro { background: #ffebee; color: #c62828; padding: 15px; margin: 10px; border-radius: 5px; }
+        .loading { text-align: center; padding: 30px; color: #666; }
+        .erro-msg { background: #ffebee; color: #c62828; padding: 15px; margin: 10px; border-radius: 8px; }
+        
+        .btn-resolver {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -178,8 +204,8 @@
     <div class="container">
         <div class="sidebar">
             <div class="sidebar-header">
-                📋 Chamados Pendentes
-                <button onclick="carregarChamados()" style="float: right; font-size: 12px;">🔄 Atualizar</button>
+                <span>📋 Chamados Pendentes</span>
+                <button class="btn-atualizar" onclick="carregarChamados()">🔄 Atualizar</button>
             </div>
             <div class="chamados-list" id="listaChamados">
                 <div class="loading">Carregando...</div>
@@ -192,11 +218,16 @@
                     <h3>Selecione um chamado</h3>
                     <p>Clique em um cliente ao lado para ver o histórico</p>
                 </div>
+                <button class="btn-resolver" onclick="marcarResolvido()" id="btnResolver" style="display: none;">
+                    ✅ Marcar Resolvido
+                </button>
             </div>
             
             <div class="chat-messages" id="chatMessages">
                 <div class="sem-chamado">
-                    Nenhum chamado selecionado
+                    <div class="sem-chamado-icon">💬</div>
+                    <h3>Nenhum chamado selecionado</h3>
+                    <p>Selecione um cliente ao lado para ver a conversa</p>
                 </div>
             </div>
 
@@ -217,28 +248,25 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO
+        // SUA CHAVE DO SUPABASE (JÁ CONFIGURADA)
         const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVocGlrbXFyaWVsZHBsd2tteXlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzkzMjIsImV4cCI6MjA4OTcxNTMyMn0.7q5-vcJfzqjcaiiuvDg1kMGFmWEH07bBscqKH85DN0c'; // ⬅️ COLE SUA CHAVE AQUI!
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVocGlrbXFyaWVsZHBsd2tteXlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMzkzMjIsImV4cCI6MjA4OTcxNTMyMn0.7q5-vcJfzqjcaiiuvDg1kMGFmWEH07bBscqKH85DN0c';
         
         let clienteAtual = null;
         let refreshInterval;
 
-        // Verifica configuração
-        if (SUPABASE_KEY === 'sua-chave-anon-aqui') {
-            document.getElementById('listaChamados').innerHTML = 
-                '<div class="erro">⚠️ Configure a chave do Supabase na linha 189!</div>';
-        } else {
+        window.onload = () => {
             carregarChamados();
             refreshInterval = setInterval(carregarChamados, 5000);
             
-            // Verifica URL param
             const urlParams = new URLSearchParams(window.location.search);
             const tel = urlParams.get('telefone');
-            if (tel) setTimeout(() => abrirChat(tel), 500);
-        }
+            if (tel) setTimeout(() => abrirChat(tel), 800);
+        };
 
         async function carregarChamados() {
+            const div = document.getElementById('listaChamados');
+            
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/intervencoes?status=eq.pendente&order=data.desc`, {
                     headers: {
@@ -247,72 +275,69 @@
                     }
                 });
                 
-                if (!res.ok) throw new Error('Erro ao carregar');
-                
                 const chamados = await res.json();
-                const div = document.getElementById('listaChamados');
                 
                 if (chamados.length === 0) {
-                    div.innerHTML = '<div style="padding: 20px; color: #999; text-align: center;">Nenhum chamado pendente ✅</div>';
+                    div.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #999;">
+                            <div style="font-size: 50px; margin-bottom: 15px;">✅</div>
+                            <p>Nenhum chamado pendente!</p>
+                            <small>O robô está resolvendo tudo sozinho</small>
+                        </div>
+                    `;
                     return;
                 }
 
                 div.innerHTML = chamados.map(c => `
                     <div class="chamado ${clienteAtual?.telefone === c.telefone ? 'ativo' : ''} ${c.status === 'pendente' ? 'novo' : ''}" 
                          onclick="abrirChat('${c.telefone}')">
-                        <div class="chamado-header">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span class="chamado-nome">${c.nome}</span>
                             <span class="badge ${c.status}">${c.status}</span>
                         </div>
                         <div class="chamado-msg">${c.mensagem || 'Sem mensagem'}</div>
                         <div class="chamado-info">
-                            📱 ${c.telefone} • ${new Date(c.data).toLocaleTimeString()}
+                            📱 ${c.telefone} • 🕐 ${new Date(c.data).toLocaleTimeString()}
                         </div>
                     </div>
                 `).join('');
                 
             } catch (erro) {
-                document.getElementById('listaChamados').innerHTML = 
-                    `<div class="erro">Erro: ${erro.message}</div>`;
+                div.innerHTML = `<div class="erro-msg">❌ Erro: ${erro.message}</div>`;
             }
         }
 
         async function abrirChat(telefone) {
             clienteAtual = { telefone };
             
-            // Busca dados do cliente
             try {
                 const resCliente = await fetch(`${SUPABASE_URL}/rest/v1/clientes?telefone=eq.${telefone}&select=*`, {
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                 });
                 const cliente = await resCliente.json();
+                
                 if (cliente[0]) {
                     clienteAtual = { ...clienteAtual, ...cliente[0] };
                 }
                 
-                // Atualiza header
                 document.getElementById('chatHeader').innerHTML = `
                     <div class="chat-header-info">
                         <h3>${clienteAtual.nome || 'Cliente'}</h3>
-                        <p>📱 ${telefone} | 🔧 ${clienteAtual.servico || '-'} | 📍 ${clienteAtual.bairro || '-'} | Etapa: ${clienteAtual.etapa || 'inicio'}</p>
+                        <p>📱 ${telefone} | 🔧 ${clienteAtual.servico || '-'} | 📍 ${clienteAtual.bairro || '-'} | 📊 ${clienteAtual.etapa || 'inicio'}</p>
                     </div>
-                    <button onclick="marcarResolvido()" style="background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
+                    <button class="btn-resolver" onclick="marcarResolvido()" id="btnResolver">
                         ✅ Marcar Resolvido
                     </button>
                 `;
                 
-                // Habilita input
                 document.getElementById('msgResposta').disabled = false;
                 document.getElementById('btnEnviar').disabled = false;
                 
             } catch (e) {
-                console.error('Erro ao buscar cliente:', e);
+                console.error('Erro buscar cliente:', e);
             }
             
-            // Busca HISTÓRICO COMPLETO
             await carregarHistorico(telefone);
-            
-            // Atualiza lista visual
             carregarChamados();
         }
 
@@ -331,7 +356,7 @@
                 const mensagens = await res.json();
                 
                 if (mensagens.length === 0) {
-                    div.innerHTML = '<div class="sem-chamado">Sem histórico de mensagens</div>';
+                    div.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Sem histórico de mensagens</div>';
                     return;
                 }
 
@@ -345,16 +370,18 @@
                     </div>
                 `).join('');
                 
-                // Scroll para baixo
                 div.scrollTop = div.scrollHeight;
                 
             } catch (erro) {
-                div.innerHTML = `<div class="erro">Erro ao carregar histórico: ${erro.message}</div>`;
+                div.innerHTML = `<div class="erro-msg">❌ Erro ao carregar histórico: ${erro.message}</div>`;
             }
         }
 
         async function enviarResposta() {
-            if (!clienteAtual) return;
+            if (!clienteAtual) {
+                alert('Selecione um chamado primeiro!');
+                return;
+            }
             
             const btn = document.getElementById('btnEnviar');
             const textarea = document.getElementById('msgResposta');
@@ -366,7 +393,6 @@
             btn.textContent = 'Enviando...';
             
             try {
-                // Envia para API
                 const res = await fetch('/api/resposta', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -380,13 +406,12 @@
                 
                 if (!dados.sucesso) throw new Error(dados.erro || 'Erro ao enviar');
                 
-                // Limpa e recarrega
                 textarea.value = '';
                 await carregarHistorico(clienteAtual.telefone);
                 await carregarChamados();
                 
             } catch (erro) {
-                alert('Erro ao enviar: ' + erro.message);
+                alert('❌ Erro ao enviar: ' + erro.message);
             } finally {
                 btn.disabled = false;
                 btn.textContent = '📤 Enviar';
@@ -440,24 +465,29 @@
                 
                 carregarChamados();
                 
-                // Limpa chat
-                document.getElementById('chatMessages').innerHTML = '<div class="sem-chamado">Chamado resolvido ✅</div>';
+                document.getElementById('chatMessages').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #4caf50;">
+                        <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
+                        <h3>Chamado resolvido!</h3>
+                    </div>
+                `;
                 document.getElementById('chatHeader').innerHTML = `
                     <div class="chat-header-info">
                         <h3>Selecione um chamado</h3>
-                        <p>Chamado anterior resolvido</p>
+                        <p>Chamado anterior resolvido com sucesso</p>
                     </div>
                 `;
                 document.getElementById('msgResposta').disabled = true;
                 document.getElementById('btnEnviar').disabled = true;
+                document.getElementById('btnResolver').style.display = 'none';
                 clienteAtual = null;
                 
             } catch (erro) {
-                alert('Erro ao marcar resolvido: ' + erro.message);
+                alert('❌ Erro: ' + erro.message);
             }
         }
 
-        // Atalho: Ctrl+Enter para enviar
+        // Atalho Ctrl+Enter
         document.getElementById('msgResposta')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && e.ctrlKey) enviarResposta();
         });
