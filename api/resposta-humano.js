@@ -20,6 +20,8 @@ export default async function handler(req, res) {
     })
   });
 
+  await enviarWhatsApp(telefone, mensagem);
+
   // Envia no WhatsApp
   await fetch(`https://graph.facebook.com/v18.0/${process.env.WHATSAPP_ID_NUMERO}/messages`, {
     method: 'POST',
