@@ -3,24 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Botpress • Oficina IA - Treinamento</title>
+    <title>Botpress • Oficina IA - Treinamento (Mirella)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary: #00b894; }
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
         body { background:#f4f6f9; display:flex; min-height:100vh; }
         .sidebar { width:280px; background:#2d3436; color:white; padding:25px 20px; }
-        .menu-item { padding:15px 20px; cursor:pointer; border-radius:8px; margin-bottom:8px; }
+        .menu-item { padding:15px 20px; cursor:pointer; border-radius:8px; margin-bottom:8px; transition:0.2s; }
         .menu-item:hover, .menu-item.active { background:#00b894; color:white; }
         .main { flex:1; padding:40px; overflow:auto; }
         .card { background:white; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.1); padding:30px; margin-bottom:30px; }
         .tab { display:none; }
         .tab.active { display:block; }
-        input, textarea { width:100%; padding:14px; border:1px solid #ddd; border-radius:10px; margin-top:8px; }
+        input, textarea { width:100%; padding:14px; border:1px solid #ddd; border-radius:10px; margin-top:8px; font-size:16px; }
         .btn { background:var(--primary); color:white; border:none; padding:14px 28px; border-radius:10px; cursor:pointer; font-weight:600; }
+        .item { background:#f8f9fa; padding:15px; border-radius:10px; margin:12px 0; display:flex; justify-content:space-between; align-items:center; }
+        .chat-test { border:1px solid #ddd; border-radius:12px; padding:20px; height:420px; overflow-y:auto; background:#e5ddd5; display:flex; flex-direction:column; gap:12px; }
+        .msg { max-width:75%; padding:12px 16px; border-radius:18px; font-size:15px; }
+        .msg.user { background:#dcf8c6; align-self:flex-end; }
+        .msg.bot { background:white; align-self:flex-start; }
     </style>
 </head>
 <body>
+
 <div class="sidebar">
     <h2><i class="fas fa-robot"></i> Oficina IA</h2>
     <div class="menu-item active" onclick="mostrar('personalidade')">👤 Personalidade</div>
@@ -28,43 +34,68 @@
     <div class="menu-item" onclick="mostrar('regras')">⚖️ Regras</div>
     <div class="menu-item" onclick="mostrar('precos')">💰 Preços</div>
     <div class="menu-item" onclick="mostrar('tecnicos')">🔧 Técnicos</div>
-    <div class="menu-item" onclick="mostrar('teste')">🧪 Testar</div>
-    <a href="/intervencao.html" style="position:absolute;bottom:40px;left:25px;color:#00b894;">🚨 Intervenção</a>
+    <div class="menu-item" onclick="mostrar('teste')">🧪 Testar Robô ao Vivo</div>
+    <a href="/intervencao.html" style="position:absolute;bottom:40px;left:25px;color:#00b894;font-size:18px;text-decoration:none;">🚨 Ir para Intervenção</a>
 </div>
 
 <div class="main">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
-        <h1>Treinamento do Robô</h1>
-        <button class="btn" onclick="salvarTudo()">💾 Salvar Tudo</button>
+        <h1>Treinamento do Robô (Mirella)</h1>
+        <button class="btn" onclick="salvarTudo()">💾 Salvar e Atualizar Robô</button>
     </div>
 
+    <!-- PERSONALIDADE -->
     <div id="personalidade" class="tab active card">
         <h2>👤 Personalidade & Tom</h2>
-        <textarea id="txtPersonalidade" rows="8"></textarea>
+        <textarea id="txtPersonalidade" rows="8" placeholder="Descreva como o robô deve falar..."></textarea>
     </div>
+
+    <!-- SCRIPTS -->
     <div id="scripts" class="tab card">
         <h2>📝 Scripts de Atendimento</h2>
-        <textarea id="txtScripts" rows="12"></textarea>
+        <textarea id="txtScripts" rows="12" placeholder="Cole todos os scripts aqui..."></textarea>
     </div>
+
+    <!-- REGRAS -->
     <div id="regras" class="tab card">
         <h2>⚖️ Regras & Procedimentos</h2>
-        <textarea id="txtRegras" rows="10"></textarea>
+        <textarea id="txtRegras" rows="10" placeholder="Regras que o robô nunca pode quebrar..."></textarea>
     </div>
-    <!-- Adicione as outras abas (precos, tecnicos, teste) se quiser, igual às versões anteriores -->
+
+    <!-- PREÇOS -->
+    <div id="precos" class="tab card">
+        <h2>💰 Preços por Bairro e Serviço</h2>
+        <button class="btn" onclick="adicionarPreco()" style="margin-bottom:15px;">+ Adicionar Preço</button>
+        <div id="listaPrecos"></div>
+    </div>
+
+    <!-- TÉCNICOS -->
+    <div id="tecnicos" class="tab card">
+        <h2>🔧 Cadastro de Técnicos</h2>
+        <button class="btn" onclick="adicionarTecnico()" style="margin-bottom:15px;">+ Adicionar Técnico</button>
+        <div id="listaTecnicos"></div>
+    </div>
+
+    <!-- TESTAR ROBÔ (chat real com Groq) -->
+    <div id="teste" class="tab card">
+        <h2>🧪 Testar Robô ao Vivo (converse como cliente)</h2>
+        <div id="chatTeste" class="chat-test"></div>
+        <div style="margin-top:15px;display:flex;gap:10px;">
+            <input id="msgTeste" placeholder="Digite sua mensagem para o robô..." style="flex:1;padding:14px;border-radius:10px;">
+            <button class="btn" onclick="enviarMensagemTeste()">Enviar</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    // Senha simples - só você sabe
-    const ADMIN_SENHA = "info261";
+    const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
+    let SUPABASE_KEY = localStorage.getItem('supabase_key') || prompt('🔑 Cole sua SERVICE ROLE KEY (uma vez só):');
+    localStorage.setItem('supabase_key', SUPABASE_KEY);
+
+    let precos = [];
+    let tecnicos = [];
 
     window.onload = () => {
-        const senha = prompt("🔐 Digite a senha para acessar o treinamento:");
-        if (senha !== ADMIN_SENHA) {
-            alert("Senha incorreta. Redirecionando para intervenção.");
-            window.location.href = "/intervencao.html";
-            return;
-        }
-        // Carregar dados salvos (mesmo código anterior)
         carregarDados();
     };
 
@@ -75,14 +106,98 @@
         document.querySelector(`.menu-item[onclick="mostrar('${id}')"]`).classList.add('active');
     }
 
-    async function salvarTudo() {
-        alert('✅ Configurações salvas! O robô vai obedecer essas instruções no WhatsApp.');
-        // Aqui você pode adicionar o fetch para salvar no Supabase (personalidade, scripts, regras)
+    async function carregarDados() {
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/config`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            const data = await res.json();
+            if (data[0]) {
+                document.getElementById('txtPersonalidade').value = data[0].personalidade || '';
+                document.getElementById('txtScripts').value = data[0].scripts || '';
+                document.getElementById('txtRegras').value = data[0].regras || '';
+            }
+        } catch(e) {}
     }
 
-    function carregarDados() {
-        // Carregar do Supabase se quiser (opcional por enquanto)
-        console.log("Treinamento carregado");
+    async function salvarTudo() {
+        const body = {
+            personalidade: document.getElementById('txtPersonalidade').value,
+            scripts: document.getElementById('txtScripts').value,
+            regras: document.getElementById('txtRegras').value
+        };
+
+        await fetch(`${SUPABASE_URL}/rest/v1/config`, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
+            body: JSON.stringify(body)
+        });
+
+        alert('✅ Tudo salvo! O robô agora está atualizado e vai obedecer exatamente o que você treinou.');
+    }
+
+    // PREÇOS
+    function adicionarPreco() {
+        const bairro = prompt('Bairro:');
+        const servico = prompt('Serviço (ex: conserto geladeira):');
+        const valor = prompt('Valor da visita (R$):');
+        if (bairro && servico && valor) {
+            precos.push({bairro, servico, valor});
+            renderPrecos();
+        }
+    }
+    function renderPrecos() {
+        document.getElementById('listaPrecos').innerHTML = precos.map((p,i) => `
+            <div class="item">
+                <span><strong>${p.bairro}</strong> — ${p.servico} → R$ ${p.valor}</span>
+                <button onclick="precos.splice(${i},1);renderPrecos()" style="background:#e74c3c;color:white;border:none;padding:5px 10px;border-radius:5px;">Excluir</button>
+            </div>
+        `).join('');
+    }
+
+    // TÉCNICOS
+    function adicionarTecnico() {
+        const nome = prompt('Nome do técnico:');
+        const especialidade = prompt('Especialidade (geladeira, marcenaria...):');
+        const telefone = prompt('WhatsApp do técnico:');
+        if (nome && especialidade && telefone) {
+            tecnicos.push({nome, especialidade, telefone});
+            renderTecnicos();
+        }
+    }
+    function renderTecnicos() {
+        document.getElementById('listaTecnicos').innerHTML = tecnicos.map((t,i) => `
+            <div class="item">
+                <span><strong>${t.nome}</strong> — ${t.especialidade} • ${t.telefone}</span>
+                <button onclick="tecnicos.splice(${i},1);renderTecnicos()" style="background:#e74c3c;color:white;border:none;padding:5px 10px;border-radius:5px;">Excluir</button>
+            </div>
+        `).join('');
+    }
+
+    // TESTAR ROBÔ (chat real com Groq)
+    async function enviarMensagemTeste() {
+        const input = document.getElementById('msgTeste');
+        const chat = document.getElementById('chatTeste');
+        const texto = input.value.trim();
+        if (!texto) return;
+
+        chat.innerHTML += `<div class="msg user">${texto}</div>`;
+        input.value = '';
+        chat.scrollTop = chat.scrollHeight;
+
+        // Chama o Groq com as instruções salvas
+        try {
+            const res = await fetch('/api/test-chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ mensagem: texto })
+            });
+            const data = await res.json();
+            chat.innerHTML += `<div class="msg bot">${data.resposta}</div>`;
+        } catch(e) {
+            chat.innerHTML += `<div class="msg bot">❌ Erro ao conectar com Groq</div>`;
+        }
+        chat.scrollTop = chat.scrollHeight;
     }
 </script>
 </body>
