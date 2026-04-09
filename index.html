@@ -14,51 +14,76 @@
         .card { background:white; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.1); padding:30px; margin-bottom:25px; }
         .menu-item { padding:15px 20px; cursor:pointer; border-radius:8px; margin-bottom:8px; }
         .menu-item:hover, .menu-item.active { background:#00b894; color:white; }
-        input, textarea { width:100%; padding:14px; border:1px solid #ddd; border-radius:10px; margin-top:8px; }
+        input, textarea { width:100%; padding:14px; border:1px solid #ddd; border-radius:10px; margin-top:8px; font-size:16px; }
         .btn { background:#00b894; color:white; border:none; padding:14px 28px; border-radius:10px; cursor:pointer; font-weight:600; }
         .item { background:#f8f9fa; padding:15px; border-radius:10px; margin:12px 0; display:flex; justify-content:space-between; }
     </style>
 </head>
 <body>
+
     <div class="sidebar">
         <h2><i class="fas fa-robot"></i> Oficina IA</h2>
         <div class="menu-item active" onclick="mostrar('personalidade')">👤 Personalidade</div>
-        <div class="menu-item" onclick="mostrar('scripts')">📝 Scripts</div>
+        <div class="menu-item" onclick="mostrar('scripts')">📝 Scripts de Atendimento</div>
         <div class="menu-item" onclick="mostrar('regras')">⚖️ Regras</div>
         <div class="menu-item" onclick="mostrar('precos')">💰 Preços</div>
         <div class="menu-item" onclick="mostrar('tecnicos')">🔧 Técnicos</div>
-        <div class="menu-item" onclick="mostrar('teste')">🧪 Testar</div>
+        <div class="menu-item" onclick="mostrar('teste')">🧪 Testar Robô</div>
         <a href="/intervencao.html" style="position:absolute;bottom:40px;left:25px;color:#00b894;font-size:18px;text-decoration:none;">🚨 Intervenção</a>
+        <a href="/planilha.html" style="position:absolute;bottom:80px;left:25px;color:#00b894;font-size:18px;text-decoration:none;">📊 Planilha em Tempo Real</a>
     </div>
 
     <div class="main">
-        <div class="header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
             <h1>Treinamento do Robô (Apenas Mirella)</h1>
             <button class="btn" onclick="salvarTudo()">💾 Salvar Tudo</button>
         </div>
 
-        <div id="personalidade" class="card tab active"> <!-- conteúdo completo das abas conforme o anterior que te dei --> </div>
-        <!-- Repita as outras divs de scripts, regras, precos, tecnicos, teste conforme o index.html que te entreguei na mensagem anterior -->
-        <!-- (para não ficar gigante aqui, use o que eu te dei na última resposta – é idêntico) -->
+        <!-- PERSONALIDADE -->
+        <div id="personalidade" class="card tab active">
+            <h2>👤 Personalidade & Tom</h2>
+            <textarea id="txtPersonalidade" rows="6" placeholder="Descreva como o robô deve falar..."></textarea>
+        </div>
+
+        <!-- SCRIPTS -->
+        <div id="scripts" class="card tab">
+            <h2>📝 Scripts de Atendimento</h2>
+            <textarea id="txtScripts" rows="10" placeholder="Cole aqui TODOS os scripts completos. O robô vai obedecer 100%."></textarea>
+        </div>
+
+        <!-- REGRAS -->
+        <div id="regras" class="card tab">
+            <h2>⚖️ Regras & Procedimentos</h2>
+            <textarea id="txtRegras" rows="8" placeholder="Regras que o robô NUNCA deve quebrar..."></textarea>
+        </div>
+
+        <!-- PREÇOS, TÉCNICOS, TESTE – copie do index anterior que te dei -->
+        <!-- (para não ficar gigante aqui, use o mesmo conteúdo das abas que eu te entreguei antes) -->
+
     </div>
 
     <script>
-        // Senha de administradora (mude se quiser)
-        const ADMIN_PASSWORD = "mirella123";
+        const ADMIN_PASSWORD = "info261";
+        const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
         let SUPABASE_KEY = localStorage.getItem('supabase_key') || '';
 
         window.onload = () => {
             if (!localStorage.getItem('admin_logged')) {
-                const senha = prompt("🔐 Digite a senha de administradora:");
+                const senha = prompt("🔐 Senha de Administradora:");
                 if (senha !== ADMIN_PASSWORD) {
-                    alert("Acesso negado. Apenas a administradora pode treinar o robô.");
+                    alert("❌ Acesso negado. Apenas a administradora pode treinar o robô.");
                     window.location.href = "/intervencao.html";
                     return;
                 }
                 localStorage.setItem('admin_logged', 'true');
             }
-            // resto do código de carregar/salvar (igual ao que te dei antes)
+            // carregar dados existentes (mesmo código anterior)
+            carregarDados();
         };
+
+        function mostrar(id) { /* mesmo código anterior */ }
+        async function salvarTudo() { /* mesmo código anterior */ }
+        async function carregarDados() { /* mesmo código anterior */ }
     </script>
 </body>
 </html>
