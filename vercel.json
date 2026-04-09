@@ -1,11 +1,14 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/login.html" }
+    {
+      "source": "/",
+      "destination": "/login.html"
+    }
   ],
   "crons": [
     {
       "path": "/api/relatorio-diario",
-      "schedule": "0 22 * * *"   // 19:00 São Paulo = 22:00 UTC
+      "schedule": "0 22 * * *"
     }
   ]
 }
