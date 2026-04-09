@@ -2,22 +2,25 @@
 export default async function handler(req, res) {
   // ===== VERIFICAÇÃO DO META (GET) =====
   if (req.method === 'GET') {
-    const mode = req.query['hub.mode'];
-    const token = req.query['hub.verify_token'];
-    const challenge = req.query['hub.challenge'];
-    
-    console.log('GET recebido:', { mode, token, challenge });
-    
-    // Token fixo para garantir (troque depois pela variável)
-   const VERIFY_TOKEN = 'oficina123token'; // força o token correto
-    
-    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('✅ Verificado!');
-      return res.status(200).send(challenge);
-    }
-    
-    return res.status(403).send('Falha na verificação');
+  const { query } = req;
+  
+  const mode = query['hub.mode'];
+  const token = query['hub.verify_token'];
+  const challenge = query['hub.challenge'];
+
+  console.log('GET recebido RAW:', req.url);
+  console.log('GET recebido PARSED:', { mode, token, challenge });
+
+  const VERIFY_TOKEN = 'oficina123token';
+
+  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+    console.log('✅ Verificado!');
+    return res.status(200).send(challenge);
   }
+
+  console.log('❌ Falhou:', { mode, token });
+  return res.status(403).send('Falha na verificação');
+}
   
   // ===== RECEBER MENSAGENS (POST) =====
   if (req.method === 'POST') {
