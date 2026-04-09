@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     console.log('GET recebido:', { mode, token, challenge });
     
     // Token fixo para garantir (troque depois pela variável)
-    const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'oficina123token';
+   const VERIFY_TOKEN = 'oficina123token'; // força o token correto
     
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
       console.log('✅ Verificado!');
