@@ -44,6 +44,7 @@ export default async function handler(req, res) {
 
 // PROCESSA MENSAGEM COM IA GROQ
 async function processarMensagem(body) {
+  console.log('BODY COMPLETO:', JSON.stringify(body, null, 2));
   const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   if (!message) return;
   
