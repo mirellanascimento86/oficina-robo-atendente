@@ -86,6 +86,13 @@
 </div>
 
 <script>
+    // === VERIFICAÇÃO DE LOGIN ===
+const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+if (!usuarioLogado || usuarioLogado.role !== 'admin') {
+    alert('Acesso permitido apenas para a administradora (Mirella).');
+    window.location.href = '/login.html';
+    return;  // para o código
+}
     const ADMIN_PASSWORD = "info261";
     const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
     let SUPABASE_KEY = localStorage.getItem('supabase_key') || '';
@@ -110,13 +117,7 @@
         carregarDados();
     };
 
-    // Verifica login
-const usuario = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
-if (!usuario || usuario.role !== 'admin') {
-    alert('Acesso restrito à administradora.');
-    window.location.href = '/login.html';
-    return;
-}
+
 
     function mostrar(id) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
