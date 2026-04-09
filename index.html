@@ -110,6 +110,14 @@
         carregarDados();
     };
 
+    // Verifica login
+const usuario = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+if (!usuario || usuario.role !== 'admin') {
+    alert('Acesso restrito à administradora.');
+    window.location.href = '/login.html';
+    return;
+}
+
     function mostrar(id) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
