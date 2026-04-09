@@ -2,13 +2,7 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/login.html"
-    }
-  ],
-  "crons": [
-    {
-      "path": "/api/relatorio-diario",
-      "schedule": "0 22 * * *"
+      "destination": "/index.html"
     }
   ]
 }
