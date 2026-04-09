@@ -82,24 +82,37 @@ async function chamarGroq(mensagemCliente, nomeCliente) {
     if (!GROQ_API_KEY) {
       return `Olá ${nomeCliente}! 👋 Recebi sua mensagem. Estou configurando minha inteligência, mas já já respondo direitinho!`;
     }
+
+    const config = await fetch(process.env.SUPABASE_URL + '/rest/v1/config?id=eq.1', {
+  headers: {
+    apikey: process.env.SUPABASE_KEY,
+    Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+  }
+}).then(r => r.json());
+
+const personalidade = config?.[0]?.personalidade || '';
+const scripts = config?.[0]?.scripts || '';
+const regras = config?.[0]?.regras || '';
     
-    const prompt = `Você é Maria, atendente experiente e simpática de uma oficina técnica.
-    
-SERVIÇOS: Refrigeração, Máquina de Lavar, Marcenaria.
+    const prompt = `
+${personalidade}
+
+SCRIPTS:
+${scripts}
 
 REGRAS:
-- Sempre pergunte o bairro antes de dar preço
-- Visita custa R$ 50-80 (depende do bairro)
-- Orçamento é grátis na visita
-- Peça foto do defeito
-- Ofereça datas: amanhã manhã/tarde ou sábado
-- Seja persuasiva para fechar a visita
-- Se não souber, diga que vai chamar supervisora
+${regras}
+
+INSTRUÇÕES:
+- Você é humana, nunca diga que é IA
+- Sempre tentar marcar visita
+- Sempre pedir bairro antes do preço
+- Seja simpática, direta e persuasiva
+- Se não souber → diga que vai chamar supervisora
 
 CLIENTE: ${nomeCliente}
 MENSAGEM: "${mensagemCliente}"
-
-Responda como Maria, atendente humana:`;
+`;
 
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
