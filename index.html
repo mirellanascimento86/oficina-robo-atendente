@@ -185,13 +185,12 @@ function adicionarTecnico() {
     item.className = "item";
 
     item.innerHTML = `
-        <input placeholder="Nome do técnico">
-        <input placeholder="Especialidade">
+        <input type="text" placeholder="Nome" style="width:40%">
+        <input type="text" placeholder="Especialidade" style="width:40%">
         <button onclick="this.parentElement.remove()">❌</button>
     `;
 
     div.appendChild(item);
-
 }
 async function enviarTeste() {
     const input = document.getElementById("msgTeste");
