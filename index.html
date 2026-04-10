@@ -90,7 +90,7 @@
             localStorage.setItem('admin_logged', 'true');
         }
         if (!SUPABASE_KEY) {
-            SUPABASE_KEY = prompt("🔑 Cole sua SERVICE ROLE KEY:");
+            SUPABASE_KEY = prompt("🔑 Cole sua SERVICE ROLE KEY (a chave secreta, não a anon):");
             localStorage.setItem('supabase_key', SUPABASE_KEY);
         }
         await carregarDados();
@@ -124,8 +124,7 @@
         if (res.ok) {
             alert('✅ Salvo com sucesso! Atualize a página para confirmar.');
         } else {
-            const err = await res.text();
-            alert('❌ Erro ao salvar: ' + err);
+            alert('❌ Erro ao salvar. Verifique se você está usando a SERVICE ROLE KEY (não a anon key).');
         }
     }
 
@@ -141,12 +140,12 @@
                 document.getElementById('txtRegras').value = data[0].regras || '';
             }
         } catch(e) {
-            console.log("Erro ao carregar dados");
+            console.log("Erro ao carregar");
         }
     }
 
-    function adicionarPreco() { alert("Adicione preços manualmente na tabela 'config' ou crie uma tabela separada."); }
-    function adicionarTecnico() { alert("Adicione técnicos manualmente na tabela Supabase."); }
+    function adicionarPreco() { alert("Adicione preços manualmente na tabela config por enquanto"); }
+    function adicionarTecnico() { alert("Adicione técnicos manualmente na tabela Supabase"); }
 
     async function enviarTeste() {
         const input = document.getElementById("msgTeste");
