@@ -1,45 +1,33 @@
 export default async function handler(req, res) {
-  const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
-  const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
-  const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-  const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-
   try {
-    // Busca dados do dia
-    const hoje = new Date().toISOString().split('T')[0];
+    const hoje = new Date().toISOString().slice(0, 10);
 
-    const resAtendimentos = await fetch(`${SUPABASE_URL}/rest/v1/historico?data=gt.${hoje}&select=*`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    const historicoRes = await fetch(`${process.env.SUPABASE_URL}/rest/v1/historico?select=*&data=gte.${hoje}T00:00:00.000Z&data=lt.${hoje}T23:59:59.999Z`, {
+      headers: {
+        apikey: process.env.SUPABASE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+      }
     });
-    const atendimentos = await resAtendimentos.json();
+    const historico = await historicoRes.json();
 
-    const total = atendimentos.length;
-    const intervencoes = atendimentos.filter(m => m.origem === 'humano').length;
+    const total = historico?.length || 0;
+    const clientes = historico?.filter(x => x.origem === 'cliente').length || 0;
+    const robo = historico?.filter(x => x.origem === 'robo').length || 0;
 
-    const mensagem = `📊 *Relatório Diário - Oficina IA* (${hoje})
+    const resumo = `📊 Resumo do dia (${hoje})
+Mensagens totais: ${total}
+Clientes: ${clientes}
+Respostas do robô: ${robo}`;
 
-✅ Atendimentos realizados: ${total}
-👥 Intervenções humanas: ${intervencoes}
-🔧 Visitas marcadas: ${Math.round(total * 0.6)} (estimado)
-🚨 Problemas não resolvidos: ${intervencoes > 0 ? intervencoes : 'Nenhum'}
-
-O robô está funcionando bem! Qualquer dúvida, avise.
-
-Boa noite! 🌙`;
-
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: mensagem,
-        parse_mode: 'Markdown'
-      })
+      body: JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text: resumo })
     });
 
-    res.status(200).json({ success: true });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro no relatório' });
+    return res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error('Erro relatorio diario:', e);
+    return res.status(500).json({ error: 'internal_error' });
   }
 }
