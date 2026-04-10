@@ -1,22 +1,29 @@
 export default async function handler(req, res) {
+  const { mensagem } = req.body;
+
+  if (!process.env.GROQ_API_KEY) {
+    return res.json({ resposta: "❌ Chave Groq não configurada. Verifique no Vercel." });
+  }
+
   try {
-    const { mensagem } = req.body;
-
-    if (!process.env.GROQ_API_KEY) {
-      return res.json({ resposta: "❌ GROQ_API_KEY não configurada" });
-    }
-
-    // busca treinamento
-    const config = await fetch(process.env.SUPABASE_URL + '/rest/v1/treinamento?id=eq.1', {
+    const configRes = await fetch(`${process.env.SUPABASE_URL}/rest/v1/config`, {
       headers: {
         apikey: process.env.SUPABASE_KEY,
         Authorization: `Bearer ${process.env.SUPABASE_KEY}`
       }
-    }).then(r => r.json());
+    });
+    const config = await configRes.json();
 
-    const treinamento = config?.[0]?.conteudo || "Você é uma atendente.";
+    const systemPrompt = `
+Você é um atendente profissional da RC Construção e Reforma.
+Personalidade: ${config[0]?.personalidade || 'educado, rápido e simpático'}
+Scripts: ${config[0]?.scripts || ''}
+Regras: ${config[0]?.regras || 'Sempre seja útil e conduza para agendamento'}
 
-    const resposta = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+Responda de forma natural, como uma pessoa real no WhatsApp.
+`;
+
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
@@ -25,20 +32,24 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'llama3-8b-8192',
         messages: [
-          { role: 'system', content: treinamento },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: mensagem }
-        ]
+        ],
+        temperature: 0.7,
+        max_tokens: 600
       })
     });
 
-    const dados = await resposta.json();
+    const data = await groqRes.json();
 
-    res.json({
-      resposta: dados.choices?.[0]?.message?.content || "Erro na resposta da IA"
-    });
+    if (!data.choices || !data.choices[0]) {
+      throw new Error("Resposta inválida do Groq");
+    }
 
-  } catch (e) {
-    console.error(e);
-    res.json({ resposta: "Erro no servidor" });
+    res.json({ resposta: data.choices[0].message.content });
+
+  } catch (error) {
+    console.error("Erro Groq:", error);
+    res.json({ resposta: "Desculpe, estou com dificuldade técnica no momento. Pode repetir?" });
   }
 }
