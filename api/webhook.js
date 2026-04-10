@@ -1,4 +1,5 @@
 export default async function handler(req, res) {
+  // Verificação do Meta (GET)
   if (req.method === 'GET') {
     const VERIFY_TOKEN = 'oficina123token';
     if (req.query['hub.verify_token'] === VERIFY_TOKEN) {
@@ -9,6 +10,7 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') return res.status(405).end();
 
+  // Responde imediatamente para o Meta
   res.status(200).json({ status: 'ok' });
 
   try {
@@ -23,9 +25,12 @@ async function processarMensagem(body) {
   if (!message) return;
 
   const telefone = message.from;
-  const texto = message.text?.body || '';
+  const texto = message.text?.body || (message.type !== 'text' ? `[${message.type}]` : '');
 
-  // Carrega o que você salvou no treinamento
+  // Salva mensagem do cliente
+  await salvarHistorico(telefone, texto, 'cliente');
+
+  // Carrega configurações do treinamento
   const configRes = await fetch(`${process.env.SUPABASE_URL}/rest/v1/config`, {
     headers: {
       apikey: process.env.SUPABASE_KEY,
@@ -43,8 +48,8 @@ Personalidade: ${personalidade}
 Scripts: ${scripts}
 Regras obrigatórias: ${regras}
 
-Responda de forma natural como humana.
-Se não souber responder ou for algo complexo, diga: "Vou chamar minha supervisora para te ajudar melhor."
+Responda de forma natural, como uma humana simpática e rápida.
+Se não souber responder ou for algo complexo, responda exatamente: "Vou chamar minha supervisora para te ajudar melhor."
 `;
 
   // Chama Groq
@@ -65,14 +70,39 @@ Se não souber responder ou for algo complexo, diga: "Vou chamar minha superviso
   });
 
   const groqData = await groqRes.json();
-  const resposta = groqData.choices?.[0]?.message?.content || "Oi! Recebi sua mensagem e já te respondo.";
+  let resposta = groqData.choices?.[0]?.message?.content || "Oi! Recebi sua mensagem e já te respondo.";
 
-  // Envia para o cliente
+  // Verifica se precisa de intervenção
+  const precisaIntervencao = resposta.toLowerCase().includes("supervisora") || resposta.toLowerCase().includes("não sei");
+
+  if (precisaIntervencao) {
+    resposta = resposta.replace("Vou chamar minha supervisora para te ajudar melhor.", "").trim();
+    await avisarHumano(telefone, texto, resposta);
+  }
+
+  // Envia resposta para o cliente
   await enviarWhatsApp(telefone, resposta);
+
+  // Salva resposta do robô
+  await salvarHistorico(telefone, resposta, 'robo');
 }
 
+// Salva no histórico
+async function salvarHistorico(telefone, mensagem, origem) {
+  await fetch(`${process.env.SUPABASE_URL}/rest/v1/historico`, {
+    method: 'POST',
+    headers: {
+      apikey: process.env.SUPABASE_KEY,
+      Authorization: `Bearer ${process.env.SUPABASE_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ telefone, mensagem, origem })
+  });
+}
+
+// Envia mensagem pelo WhatsApp
 async function enviarWhatsApp(telefone, mensagem) {
-  const res = await fetch(`https://graph.facebook.com/v18.0/${process.env.WHATSAPP_ID_NUMERO}/messages`, {
+  await fetch(`https://graph.facebook.com/v18.0/${process.env.WHATSAPP_ID_NUMERO}/messages`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`,
@@ -83,6 +113,20 @@ async function enviarWhatsApp(telefone, mensagem) {
       to: telefone,
       type: 'text',
       text: { body: mensagem }
+    })
+  });
+}
+
+// Notifica no Telegram
+async function avisarHumano(telefone, mensagemCliente, respostaRobo) {
+  const texto = `🚨 INTERVENÇÃO NECESSÁRIA\n\n📱 Cliente: ${telefone}\n💬 Mensagem: ${mensagemCliente}\n🤖 Robô disse: ${respostaRobo}\n\nAcesse: https://oficina-robo-atendente.vercel.app/intervencao.html`;
+
+  await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: process.env.TELEGRAM_CHAT_ID,
+      text: texto
     })
   });
 }
