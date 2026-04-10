@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   if (req.method === 'GET') {
-    const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'oficina123token';
+    const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
