@@ -90,9 +90,8 @@
             localStorage.setItem('admin_logged', 'true');
         }
 
-        // Força pedir a chave novamente se for anon
-        if (!SUPABASE_KEY || SUPABASE_KEY.includes('anon')) {
-            SUPABASE_KEY = prompt("🔑 Cole sua SERVICE ROLE KEY (a chave longa que termina com ...TeIQ):\n\nNão use a anon key!");
+        if (!SUPABASE_KEY) {
+            SUPABASE_KEY = prompt("🔑 COLE A SERVICE ROLE KEY AQUI (a chave longa que termina com TeIQ):\n\nNão use a anon key!");
             localStorage.setItem('supabase_key', SUPABASE_KEY);
         }
 
@@ -125,9 +124,10 @@
         });
 
         if (res.ok) {
-            alert('✅ Salvo com sucesso! Atualize a página para confirmar.');
+            alert('✅ SALVO COM SUCESSO! O agente agora vai usar isso no WhatsApp.');
         } else {
-            alert('❌ Erro ao salvar. Verifique se você colou a SERVICE ROLE KEY corretamente.');
+            const errorText = await res.text();
+            alert('❌ Erro ao salvar:\n' + errorText + '\n\nVerifique se colou a SERVICE ROLE KEY correta.');
         }
     }
 
@@ -142,9 +142,7 @@
                 document.getElementById('txtScripts').value = data[0].scripts || '';
                 document.getElementById('txtRegras').value = data[0].regras || '';
             }
-        } catch(e) {
-            console.log("Erro ao carregar dados");
-        }
+        } catch(e) {}
     }
 
     function adicionarPreco() { alert("Adicione preços manualmente na tabela config por enquanto"); }
@@ -164,7 +162,7 @@
                 body: JSON.stringify({ mensagem: texto })
             });
             const data = await res.json();
-            chat.innerHTML += `<div style="text-align:left;margin:10px;"><b>Robô:</b> ${data.resposta}</div>`;
+            chat.innerHTML += `<div style="text-align:left;margin:10px;"><b>Agente IA:</b> ${data.resposta}</div>`;
         } catch(e) {
             chat.innerHTML += `<div style="text-align:left;margin:10px;color:red;">Erro ao conectar com Groq</div>`;
         }
