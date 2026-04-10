@@ -77,7 +77,7 @@
 <script>
     const ADMIN_SENHA = "info261";
     const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
-    let SUPABASE_KEY = localStorage.getItem('supabase_key') || '';
+    let SUPABASE_KEY = '';
 
     window.onload = async () => {
         if (!localStorage.getItem('admin_logged')) {
@@ -90,10 +90,14 @@
             localStorage.setItem('admin_logged', 'true');
         }
 
-        if (!SUPABASE_KEY) {
-            SUPABASE_KEY = prompt("🔑 COLE A SERVICE ROLE KEY AQUI (a chave longa que termina com TeIQ):\n\nNão use a anon key!");
-            localStorage.setItem('supabase_key', SUPABASE_KEY);
+        // Força pedir a SERVICE ROLE KEY
+        SUPABASE_KEY = prompt("🔑 COLE A SERVICE ROLE KEY AQUI (a chave que termina com TeIQ):\n\nNão use a anon key!");
+        if (!SUPABASE_KEY || SUPABASE_KEY.length < 100) {
+            alert("Chave inválida. Tente novamente.");
+            location.reload();
+            return;
         }
+        localStorage.setItem('supabase_key', SUPABASE_KEY);
 
         await carregarDados();
     };
@@ -124,10 +128,10 @@
         });
 
         if (res.ok) {
-            alert('✅ SALVO COM SUCESSO! O agente agora vai usar isso no WhatsApp.');
+            alert('✅ SALVO COM SUCESSO! O agente agora usa isso no WhatsApp.');
         } else {
             const errorText = await res.text();
-            alert('❌ Erro ao salvar:\n' + errorText + '\n\nVerifique se colou a SERVICE ROLE KEY correta.');
+            alert('❌ Erro ao salvar:\n' + errorText);
         }
     }
 
@@ -142,7 +146,9 @@
                 document.getElementById('txtScripts').value = data[0].scripts || '';
                 document.getElementById('txtRegras').value = data[0].regras || '';
             }
-        } catch(e) {}
+        } catch(e) {
+            console.log("Erro ao carregar");
+        }
     }
 
     function adicionarPreco() { alert("Adicione preços manualmente na tabela config por enquanto"); }
