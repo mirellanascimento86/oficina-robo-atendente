@@ -109,31 +109,28 @@
         document.querySelector(`.menu-item[onclick="mostrar('${id}')"]`).classList.add('active');
     }
 
-    async function salvarTudo() {
-        const body = {
-            personalidade: document.getElementById('txtPersonalidade').value,
-            scripts: document.getElementById('txtScripts').value,
-            regras: document.getElementById('txtRegras').value
-        };
+   async function salvarTudo() {
+  const body = {
+    personalidade: document.getElementById('txtPersonalidade').value,
+    scripts: document.getElementById('txtScripts').value,
+    regras: document.getElementById('txtRegras').value
+  };
 
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/config`, {
-            method: 'POST',
-            headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'resolution=merge-duplicates'
-            },
-            body: JSON.stringify(body)
-        });
+  const res = await fetch("/api/salvar-config", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
 
-        if (res.ok) {
-            alert('✅ SALVO COM SUCESSO! O agente agora usa isso no WhatsApp.');
-        } else {
-            const errorText = await res.text();
-            alert('❌ Erro ao salvar:\n' + errorText);
-        }
-    }
+  if (res.ok) {
+    alert("✅ SALVO COM SUCESSO!");
+  } else {
+    const errorText = await res.text();
+    alert("❌ Erro ao salvar:\n" + errorText);
+  }
+}
 
     async function carregarDados() {
         try {
