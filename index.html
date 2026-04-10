@@ -16,7 +16,7 @@
         .card { background:white; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.1); padding:25px; margin-bottom:25px; }
         .tab { display:none; }
         .tab.active { display:block; }
-        textarea, input { width:100%; padding:14px; border:1px solid #ddd; border-radius:10px; margin-top:8px; font-size:16px; }
+        textarea { width:100%; padding:14px; border:1px solid #ddd; border-radius:10px; margin-top:8px; font-size:16px; }
         .btn { background:#00b894; color:white; border:none; padding:14px; border-radius:10px; cursor:pointer; font-weight:600; width:100%; margin-top:15px; }
         @media (min-width: 768px) {
             body { flex-direction:row; }
@@ -124,7 +124,7 @@
         if (res.ok) {
             alert('✅ Salvo com sucesso! O robô agora usa essas instruções no WhatsApp.');
         } else {
-            alert('❌ Erro ao salvar. Verifique a chave Supabase.');
+            alert('❌ Erro ao salvar. Verifique se a tabela "config" existe no Supabase.');
         }
     }
 
@@ -144,9 +144,8 @@
         }
     }
 
-    // Funções de Preços e Técnicos (simples)
-    function adicionarPreco() { alert("Adicione preço manualmente na tabela Supabase por enquanto"); }
-    function adicionarTecnico() { alert("Adicione técnico manualmente na tabela Supabase por enquanto"); }
+    function adicionarPreco() { alert("Adicione preços manualmente na tabela Supabase por enquanto"); }
+    function adicionarTecnico() { alert("Adicione técnicos manualmente na tabela Supabase por enquanto"); }
 
     async function enviarTeste() {
         const input = document.getElementById("msgTeste");
