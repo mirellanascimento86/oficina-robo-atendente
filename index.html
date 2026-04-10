@@ -163,15 +163,15 @@ function extrair(texto, chave) {
     return partes[1].split("\n\n")[0].trim();
 
 }
-    function adicionarPreco() {
+   function adicionarPreco() {
     const div = document.getElementById("listaPrecos");
 
     const item = document.createElement("div");
     item.className = "item";
 
     item.innerHTML = `
-        <input placeholder="Nome do serviço">
-        <input placeholder="Preço">
+        <input type="text" placeholder="Serviço" style="width:40%">
+        <input type="text" placeholder="Preço" style="width:40%">
         <button onclick="this.parentElement.remove()">❌</button>
     `;
 
