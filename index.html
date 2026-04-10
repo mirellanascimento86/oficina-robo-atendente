@@ -171,8 +171,30 @@ function adicionarTecnico() {
     `;
 
     div.appendChild(item);
-}
 
+}
+async function enviarTeste() {
+    const input = document.getElementById("msgTeste");
+    const chat = document.getElementById("chatTeste");
+
+    const texto = input.value.trim();
+    if (!texto) return;
+
+    chat.innerHTML += `<div style="text-align:right;margin:10px;"><b>Você:</b> ${texto}</div>`;
+
+    input.value = "";
+
+    const res = await fetch("/api/test-chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ mensagem: texto })
+    });
+
+    const data = await res.json();
+
+    chat.innerHTML += `<div style="text-align:left;margin:10px;"><b>IA:</b> ${data.resposta}</div>`;
+    chat.scrollTop = chat.scrollHeight;
+}
 </script>
     
 </body>
