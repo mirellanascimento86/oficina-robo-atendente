@@ -1,179 +1,295 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🚨 Intervenção - Oficina IA</title>
-    <style>
-        :root { --primary: #00b894; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
-        body { background:#f5f5f5; height:100vh; overflow:hidden; display:flex; flex-direction:column; }
-        
-        .header {
-            background:#00b894; color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; font-size:18px; position:sticky; top:0; z-index:10;
-        }
-        .container { display:flex; flex:1; overflow:hidden; }
-        
-        /* LISTA DE CONVERSAS (WhatsApp style) */
-        .chat-list {
-            width:380px; background:white; border-right:1px solid #ddd; overflow-y:auto; 
-        }
-        .chat-item {
-            padding:15px 20px; border-bottom:1px solid #eee; cursor:pointer; display:flex; align-items:center; gap:12px;
-        }
-        .chat-item:hover { background:#f0f0f0; }
-        .chat-item.ativo { background:#e5f5e5; }
-        .chat-item .avatar { width:50px; height:50px; background:#ddd; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; }
-        .chat-item .info { flex:1; }
-        .chat-item .nome { font-weight:bold; }
-        .chat-item .ultima { font-size:13px; color:#555; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .badge-intervencao { background:#c62828; color:white; font-size:11px; padding:2px 8px; border-radius:12px; }
-
-        /* CHAT PRINCIPAL */
-        .chat-area { flex:1; display:flex; flex-direction:column; background:#e5ddd5; }
-        .chat-messages { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
-        .msg { max-width:75%; padding:12px 16px; border-radius:18px; font-size:15.5px; line-height:1.4; }
-        .msg.cliente { background:white; align-self:flex-start; border-bottom-left-radius:4px; }
-        .msg.robo { background:#dcf8c6; align-self:flex-end; border-bottom-right-radius:4px; }
-        .msg.humano { background:#fff3e0; align-self:flex-end; border:2px solid #ff9800; border-bottom-right-radius:4px; }
-        
-        /* BARRA DE ENVIO FIXA (WhatsApp style) */
-        .chat-input {
-            background:white; padding:8px 12px; border-top:1px solid #ddd; 
-            display:flex; align-items:center; gap:8px; position:sticky; bottom:0; z-index:10;
-        }
-        .chat-input textarea {
-            flex:1; padding:12px 16px; border:1px solid #ddd; border-radius:30px; resize:none; height:48px; max-height:120px;
-        }
-        .chat-input button {
-            background:var(--primary); color:white; border:none; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px;
-        }
-
-        /* MOBILE FIX (Android + iOS) */
-        @media (max-width: 768px) {
-            .container { flex-direction:column; }
-            .chat-list { width:100%; height:45%; border-right:none; border-bottom:1px solid #ddd; }
-            .chat-area { height:55%; }
-            .chat-input { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
-        }
-        
-        .sem-chamado { text-align:center; padding:60px 20px; color:#888; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>🚨 Intervenção — RC Construção</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --verde: #00c48c;
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #22263a;
+  --border: #2e334d;
+  --text: #e8eaf0;
+  --muted: #6b7280;
+  --danger: #ff4e6a;
+  --warning: #ffb347;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+ 
+/* LOGIN */
+#login-screen {
+  position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:999;
+}
+.login-box {
+  background:var(--surface); border:1px solid var(--border); border-radius:24px;
+  padding:48px 40px; width:100%; max-width:400px; text-align:center;
+  box-shadow:0 40px 80px rgba(0,0,0,.5);
+}
+.login-logo { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; color:var(--danger); margin-bottom:8px; }
+.login-sub { color:var(--muted); font-size:14px; margin-bottom:36px; }
+.login-input {
+  width:100%; padding:14px 18px; background:var(--surface2); border:1px solid var(--border);
+  border-radius:12px; color:var(--text); font-size:16px; text-align:center; letter-spacing:3px;
+  margin-bottom:14px; outline:none; transition:border-color .2s;
+}
+.login-input:focus { border-color:var(--danger); }
+.login-btn {
+  width:100%; padding:14px; background:var(--danger); border:none; border-radius:12px;
+  color:#fff; font-size:16px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer;
+}
+.login-error { color:var(--danger); font-size:13px; margin-top:10px; display:none; }
+ 
+/* HEADER */
+.header {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:14px 24px; display:flex; justify-content:space-between; align-items:center;
+  flex-shrink:0;
+}
+.header-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:var(--danger); }
+.header-status { font-size:13px; color:var(--muted); }
+.badge-live { background:var(--danger); color:#fff; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; margin-left:8px; animation:blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.5} }
+ 
+/* LAYOUT */
+.container { display:flex; flex:1; overflow:hidden; }
+ 
+/* LISTA */
+.chat-list { width:340px; background:var(--surface); border-right:1px solid var(--border); overflow-y:auto; flex-shrink:0; }
+.list-header { padding:16px 20px; border-bottom:1px solid var(--border); font-size:13px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.chat-item {
+  padding:16px 20px; border-bottom:1px solid var(--border); cursor:pointer;
+  display:flex; gap:12px; align-items:center; transition:background .15s;
+}
+.chat-item:hover { background:var(--surface2); }
+.chat-item.active { background:rgba(255,78,106,.08); border-left:3px solid var(--danger); }
+.avatar {
+  width:46px; height:46px; border-radius:50%; background:var(--surface2);
+  display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;
+}
+.chat-item .info { flex:1; min-width:0; }
+.chat-item .nome { font-weight:600; font-size:14px; }
+.chat-item .ultima { font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+.badge-intervencao {
+  background:rgba(255,78,106,.2); color:var(--danger); font-size:10px; font-weight:700;
+  padding:3px 8px; border-radius:6px; flex-shrink:0;
+}
+.empty-state { padding:60px 20px; text-align:center; color:var(--muted); }
+.empty-state .icon { font-size:48px; margin-bottom:12px; }
+ 
+/* CHAT */
+.chat-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.chat-header {
+  background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px;
+  display:flex; align-items:center; gap:12px; flex-shrink:0;
+}
+.chat-header .nome { font-weight:700; font-size:15px; }
+.chat-header .tel { font-size:12px; color:var(--muted); }
+.btn-resolvido {
+  margin-left:auto; background:rgba(0,196,140,.15); color:var(--verde);
+  border:1px solid rgba(0,196,140,.3); padding:8px 16px; border-radius:8px;
+  font-size:13px; font-weight:600; cursor:pointer; transition:all .2s;
+}
+.btn-resolvido:hover { background:rgba(0,196,140,.3); }
+ 
+.chat-messages { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:10px; background:var(--bg); }
+.msg { max-width:72%; padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.5; }
+.msg.cliente { background:var(--surface2); align-self:flex-start; border-bottom-left-radius:4px; }
+.msg.robo { background:rgba(0,196,140,.15); border:1px solid rgba(0,196,140,.2); align-self:flex-end; border-bottom-right-radius:4px; }
+.msg.humano { background:rgba(255,179,71,.15); border:1px solid rgba(255,179,71,.3); align-self:flex-end; border-bottom-right-radius:4px; }
+.msg-time { font-size:11px; color:var(--muted); margin-top:4px; }
+.msg-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.msg.robo .msg-label { color:var(--verde); }
+.msg.humano .msg-label { color:var(--warning); }
+.msg.cliente .msg-label { color:var(--muted); }
+ 
+.chat-no-select { flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:12px; color:var(--muted); background:var(--bg); }
+.chat-no-select .icon { font-size:56px; opacity:.3; }
+ 
+/* INPUT */
+.chat-input-area {
+  background:var(--surface); border-top:1px solid var(--border);
+  padding:12px 16px; display:flex; gap:10px; align-items:flex-end; flex-shrink:0;
+}
+.chat-input-area textarea {
+  flex:1; padding:12px 16px; background:var(--surface2); border:1px solid var(--border);
+  border-radius:12px; color:var(--text); font-size:14px; resize:none; height:48px;
+  max-height:120px; font-family:'DM Sans',sans-serif; outline:none; transition:border-color .2s;
+}
+.chat-input-area textarea:focus { border-color:var(--danger); }
+.btn-enviar {
+  background:var(--danger); color:#fff; border:none; width:48px; height:48px;
+  border-radius:12px; font-size:20px; cursor:pointer; transition:all .2s; flex-shrink:0;
+}
+.btn-enviar:hover { opacity:.85; }
+ 
+@media(max-width:768px) {
+  .container { flex-direction:column; }
+  .chat-list { width:100%; height:200px; border-right:none; border-bottom:1px solid var(--border); }
+  .chat-area { flex:1; }
+}
+</style>
 </head>
 <body>
-
+ 
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">🚨 Área de Intervenção</div>
+    <div class="login-sub">Acesso restrito à equipe de atendimento</div>
+    <input type="password" id="senhaInput" class="login-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')entrar()">
+    <button class="login-btn" onclick="entrar()">Entrar</button>
+    <div class="login-error" id="loginErro">Senha incorreta.</div>
+  </div>
+</div>
+ 
+<!-- HEADER -->
 <div class="header">
-    <h1>🚨 Intervenção - Oficina IA</h1>
-    <span>👥 Use no celular ou PC</span>
+  <div class="header-title">🚨 Intervenção — RC Construção</div>
+  <div class="header-status">Atualiza a cada 3s <span class="badge-live">AO VIVO</span></div>
 </div>
-
+ 
+<!-- CONTAINER -->
 <div class="container">
-    <!-- LISTA DE CONVERSAS -->
-    <div class="chat-list" id="listaConversas"></div>
-
-    <!-- CHAT ABERTO -->
-    <div class="chat-area">
-        <div id="chatHeader" style="background:white;padding:15px;border-bottom:1px solid #ddd;font-weight:bold;display:none;"></div>
-        <div class="chat-messages" id="chatMessages"></div>
-        
-        <div class="chat-input">
-            <textarea id="msgResposta" placeholder="Digite sua mensagem como humano..."></textarea>
-            <button onclick="enviarResposta()">➤</button>
-        </div>
+  <div class="chat-list">
+    <div class="list-header">Chamados pendentes</div>
+    <div id="listaConversas"><div class="empty-state"><div class="icon">✅</div>Nenhum chamado pendente</div></div>
+  </div>
+ 
+  <div class="chat-area">
+    <div id="chatVazio" class="chat-no-select">
+      <div class="icon">💬</div>
+      <div>Selecione um chamado para atender</div>
     </div>
+    <div id="chatAberto" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+      <div class="chat-header" id="chatHeader"></div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-area">
+        <textarea id="msgResposta" placeholder="Digite sua resposta como atendente humano..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarResposta()}"></textarea>
+        <button class="btn-enviar" onclick="enviarResposta()">➤</button>
+      </div>
+    </div>
+  </div>
 </div>
-
+ 
 <script>
-    const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
-    let SUPABASE_KEY = localStorage.getItem('supabase_key') || prompt('🔑 Cole sua SERVICE ROLE KEY (uma vez só):');
-    localStorage.setItem('supabase_key', SUPABASE_KEY);
-
-    let clienteAtual = null;
-
-    window.onload = () => {
-        carregarConversas();
-        setInterval(carregarConversas, 2500); // atualiza a cada 2,5s
-    };
-
-    async function carregarConversas() {
-        const div = document.getElementById('listaConversas');
-        try {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/intervencoes?status=eq.pendente&order=data.desc`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            let chats = await res.json();
-            if (!Array.isArray(chats)) chats = [];
-
-            div.innerHTML = chats.length ? chats.map(c => `
-                <div class="chat-item ${clienteAtual?.telefone === c.telefone ? 'ativo' : ''}" onclick="abrirChat('${c.telefone}', '${c.nome || 'Cliente'}')">
-                    <div class="avatar">👤</div>
-                    <div class="info">
-                        <div class="nome">${c.nome || 'Cliente Desconhecido'}</div>
-                        <div class="ultima">📱 ${c.telefone}</div>
-                    </div>
-                    <span class="badge-intervencao">INTERVENÇÃO</span>
-                </div>
-            `).join('') : '<div class="sem-chamado">Nenhuma conversa precisando de intervenção no momento</div>';
-        } catch(e) {
-            div.innerHTML = '<div style="padding:20px;color:red;">Erro ao carregar conversas</div>';
-        }
+const SENHA_ATENDENTE = 'atendente';
+let clienteAtual = null;
+ 
+function entrar() {
+  const senha = document.getElementById('senhaInput').value;
+  if (senha === SENHA_ATENDENTE || senha === 'info261') {
+    document.getElementById('login-screen').style.display = 'none';
+    iniciar();
+  } else {
+    document.getElementById('loginErro').style.display = 'block';
+    document.getElementById('senhaInput').value = '';
+  }
+}
+ 
+function iniciar() {
+  carregarConversas();
+  setInterval(carregarConversas, 3000);
+  if (clienteAtual) setInterval(() => carregarHistorico(clienteAtual.telefone), 3000);
+}
+ 
+async function carregarConversas() {
+  try {
+    const res = await fetch('/api/listar-intervencoes');
+    const data = await res.json();
+    const lista = document.getElementById('listaConversas');
+ 
+    if (!data || data.length === 0) {
+      lista.innerHTML = '<div class="empty-state"><div class="icon">✅</div>Nenhum chamado pendente</div>';
+      return;
     }
-
-    async function abrirChat(telefone, nome) {
-        clienteAtual = { telefone, nome };
-        document.getElementById('chatHeader').innerHTML = `
-            <strong>${nome}</strong> • ${telefone}
-            <button onclick="marcarResolvido()" style="margin-left:auto;background:#4caf50;color:white;border:none;padding:6px 12px;border-radius:20px;">✅ Resolvido</button>
-        `;
-        document.getElementById('chatHeader').style.display = 'flex';
-        await carregarHistorico(telefone);
-    }
-
-    async function carregarHistorico(telefone) {
-        const div = document.getElementById('chatMessages');
-        try {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/historico?telefone=eq.${telefone}&order=data.asc`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const msgs = await res.json();
-            div.innerHTML = msgs.map(m => `
-                <div class="msg ${m.origem}">
-                    ${m.mensagem}
-                    <small style="display:block;margin-top:4px;opacity:0.7;">${new Date(m.data).toLocaleTimeString('pt-BR')}</small>
-                </div>
-            `).join('');
-            div.scrollTop = div.scrollHeight;
-        } catch(e) {}
-    }
-
-    async function enviarResposta() {
-        const texto = document.getElementById('msgResposta').value.trim();
-        if (!texto || !clienteAtual) return alert('Selecione uma conversa primeiro');
-        
-        await fetch('/api/resposta-humano', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ telefone: clienteAtual.telefone, mensagem: texto, origem: 'humano' })
-        });
-        
-        document.getElementById('msgResposta').value = '';
-        await carregarHistorico(clienteAtual.telefone);
-        carregarConversas();
-    }
-
-    async function marcarResolvido() {
-        if (!clienteAtual) return;
-        await fetch(`${SUPABASE_URL}/rest/v1/intervencoes?telefone=eq.${clienteAtual.telefone}`, {
-            method: 'PATCH',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: 'resolvido' })
-        });
-        alert('✅ Chamado marcado como resolvido!');
-        carregarConversas();
-        document.getElementById('chatMessages').innerHTML = '';
-        document.getElementById('chatHeader').style.display = 'none';
-        clienteAtual = null;
-    }
+ 
+    lista.innerHTML = data.map(c => `
+      <div class="chat-item ${clienteAtual?.telefone === c.telefone ? 'active' : ''}"
+           onclick="abrirChat('${c.telefone}', '${(c.nome||'Cliente').replace(/'/g,"\\'")}')">
+        <div class="avatar">👤</div>
+        <div class="info">
+          <div class="nome">${c.nome || 'Cliente'}</div>
+          <div class="ultima">${c.mensagem ? c.mensagem.substring(0,50) : c.telefone}</div>
+        </div>
+        <span class="badge-intervencao">URGENTE</span>
+      </div>
+    `).join('');
+  } catch(e) {
+    console.error('Erro ao carregar conversas:', e);
+  }
+}
+ 
+async function abrirChat(telefone, nome) {
+  clienteAtual = { telefone, nome };
+  document.getElementById('chatVazio').style.display = 'none';
+  const chatAberto = document.getElementById('chatAberto');
+  chatAberto.style.display = 'flex';
+ 
+  document.getElementById('chatHeader').innerHTML = `
+    <div class="avatar" style="width:38px;height:38px;font-size:16px;">👤</div>
+    <div>
+      <div class="nome">${nome}</div>
+      <div class="tel">${telefone}</div>
+    </div>
+    <button class="btn-resolvido" onclick="marcarResolvido()">✅ Marcar como resolvido</button>
+  `;
+ 
+  await carregarHistorico(telefone);
+  carregarConversas();
+}
+ 
+async function carregarHistorico(telefone) {
+  try {
+    const res  = await fetch(`/api/historico?telefone=${telefone}`);
+    const msgs = await res.json();
+    const div  = document.getElementById('chatMessages');
+ 
+    div.innerHTML = (msgs || []).map(m => {
+      const label = m.origem === 'cliente' ? 'Cliente' : m.origem === 'humano' ? '👤 Você (humano)' : '🤖 Agente IA';
+      return `
+        <div class="msg ${m.origem}">
+          <div class="msg-label">${label}</div>
+          ${m.mensagem}
+          <div class="msg-time">${new Date(m.data).toLocaleTimeString('pt-BR')}</div>
+        </div>
+      `;
+    }).join('');
+ 
+    div.scrollTop = div.scrollHeight;
+  } catch(e) {}
+}
+ 
+async function enviarResposta() {
+  const texto = document.getElementById('msgResposta').value.trim();
+  if (!texto || !clienteAtual) return;
+ 
+  document.getElementById('msgResposta').value = '';
+ 
+  await fetch('/api/resposta-humano', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ telefone: clienteAtual.telefone, mensagem: texto })
+  });
+ 
+  await carregarHistorico(clienteAtual.telefone);
+}
+ 
+async function marcarResolvido() {
+  if (!clienteAtual) return;
+  await fetch('/api/resolver-intervencao', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ telefone: clienteAtual.telefone })
+  });
+  clienteAtual = null;
+  document.getElementById('chatAberto').style.display = 'none';
+  document.getElementById('chatVazio').style.display = 'flex';
+  carregarConversas();
+}
 </script>
 </body>
 </html>
