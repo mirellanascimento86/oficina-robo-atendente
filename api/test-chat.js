@@ -1,40 +1,33 @@
 export default async function handler(req, res) {
-  const { mensagem } = req.body;
-  const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
-  const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
-  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    const { mensagem } = req.body;
 
-  // Carrega as instruções salvas
-  const configRes = await fetch(`${SUPABASE_URL}/rest/v1/config`, {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-  });
-  const config = await configRes.json();
+    const config = await fetch(process.env.SUPABASE_URL + '/rest/v1/treinamento?id=eq.1', {
+        headers: {
+            apikey: process.env.SUPABASE_KEY,
+            Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+        }
+    }).then(r => r.json());
 
-  const systemPrompt = `
-Você é um atendente de oficina de refrigeração, máquina de lavar e marcenaria.
-Personalidade: ${config[0]?.personalidade || 'educado e rápido'}
-Scripts: ${config[0]?.scripts || ''}
-Regras: ${config[0]?.regras || ''}
-Responda de forma natural, como uma conversa humana.
-`;
+    const treinamento = config?.[0]?.conteudo || '';
 
-  const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${GROQ_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'llama3-8b-8192',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: mensagem }
-      ],
-      temperature: 0.7,
-      max_tokens: 500
-    })
-  });
+    const resposta = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            model: 'llama3-8b-8192',
+            messages: [
+                { role: 'system', content: treinamento },
+                { role: 'user', content: mensagem }
+            ]
+        })
+    });
 
-  const data = await groqRes.json();
-  res.json({ resposta: data.choices[0].message.content });
+    const dados = await resposta.json();
+
+    res.json({
+        resposta: dados.choices?.[0]?.message?.content || "Erro"
+    });
 }
