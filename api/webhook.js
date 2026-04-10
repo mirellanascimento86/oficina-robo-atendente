@@ -63,6 +63,14 @@ async function processarMensagem(body) {
   }
   
   // CHAMA IA GROQ
+  const config = await fetch(process.env.SUPABASE_URL + '/rest/v1/treinamento?id=eq.1', {
+  headers: {
+    apikey: process.env.SUPABASE_KEY,
+    Authorization: `Bearer ${process.env.SUPABASE_KEY}`
+  }
+}).then(r => r.json());
+
+const treinamento = config?.[0]?.conteudo || '';
   const respostaIA = await chamarGroq(texto, nome);
   
   // Envia resposta
