@@ -1,10 +1,6 @@
 export default async function handler(req, res) {
   const { mensagem } = req.body;
 
-  if (!process.env.GROQ_API_KEY) {
-    return res.json({ resposta: "❌ Chave Groq não configurada. Verifique no Vercel." });
-  }
-
   try {
     const configRes = await fetch(`${process.env.SUPABASE_URL}/rest/v1/config`, {
       headers: {
@@ -18,38 +14,36 @@ export default async function handler(req, res) {
 Você é um atendente profissional da RC Construção e Reforma.
 Personalidade: ${config[0]?.personalidade || 'educado, rápido e simpático'}
 Scripts: ${config[0]?.scripts || ''}
-Regras: ${config[0]?.regras || 'Sempre seja útil e conduza para agendamento'}
+Regras: ${config[0]?.regras || 'Sempre seja útil e conduza para agendamento de visita'}
 
 Responda de forma natural, como uma pessoa real no WhatsApp.
 `;
 
-    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const openrouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://oficina-robo-atendente.vercel.app',
+        'X-Title': 'Oficina IA'
       },
       body: JSON.stringify({
-        model: 'llama3-8b-8192',
+        model: 'google/gemini-2.0-flash-exp:free',   // modelo gratuito e bom
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: mensagem }
-        ],
-        temperature: 0.7,
-        max_tokens: 600
+        ]
       })
     });
 
-    const data = await groqRes.json();
+    const data = await openrouterRes.json();
 
-    if (!data.choices || !data.choices[0]) {
-      throw new Error("Resposta inválida do Groq");
-    }
+    const resposta = data.choices?.[0]?.message?.content || "Desculpe, estou com dificuldade técnica. Pode repetir?";
 
-    res.json({ resposta: data.choices[0].message.content });
+    res.json({ resposta });
 
   } catch (error) {
-    console.error("Erro Groq:", error);
+    console.error("Erro OpenRouter:", error);
     res.json({ resposta: "Desculpe, estou com dificuldade técnica no momento. Pode repetir?" });
   }
 }
