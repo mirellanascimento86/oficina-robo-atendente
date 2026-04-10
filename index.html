@@ -1,176 +1,477 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oficina IA - Treinamento</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root { --primary: #00b894; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
-        body { background:#f4f6f9; display:flex; min-height:100vh; flex-direction:column; }
-        .sidebar { width:100%; background:#2d3436; color:white; padding:15px; display:flex; flex-wrap:wrap; gap:8px; }
-        .menu-item { padding:12px 18px; background:#3d4a4f; color:white; border-radius:8px; cursor:pointer; font-size:15px; flex:1; min-width:140px; text-align:center; }
-        .menu-item.active { background:#00b894; }
-        .main { flex:1; padding:20px; overflow:auto; }
-        .card { background:white; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.1); padding:25px; margin-bottom:25px; }
-        .tab { display:none; }
-        .tab.active { display:block; }
-        textarea { width:100%; padding:14px; border:1px solid #ddd; border-radius:10px; margin-top:8px; font-size:16px; }
-        .btn { background:#00b894; color:white; border:none; padding:14px; border-radius:10px; cursor:pointer; font-weight:600; width:100%; margin-top:15px; }
-        @media (min-width: 768px) {
-            body { flex-direction:row; }
-            .sidebar { width:280px; flex-direction:column; padding:25px 20px; }
-            .menu-item { flex:none; text-align:left; }
-            .main { padding:40px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RC Construção — Painel de Treinamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --verde: #00c48c;
+  --verde-dark: #00956a;
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #22263a;
+  --border: #2e334d;
+  --text: #e8eaf0;
+  --muted: #6b7280;
+  --danger: #ff4e6a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; display:flex; min-height:100vh; }
+ 
+/* LOGIN */
+#login-screen {
+  position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:999;
+  background-image: radial-gradient(ellipse at 20% 50%, rgba(0,196,140,.08) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 20%, rgba(0,196,140,.05) 0%, transparent 50%);
+}
+.login-box {
+  background:var(--surface); border:1px solid var(--border); border-radius:24px;
+  padding:48px 40px; width:100%; max-width:400px; text-align:center;
+  box-shadow: 0 40px 80px rgba(0,0,0,.5);
+}
+.login-logo { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--verde); margin-bottom:8px; }
+.login-sub { color:var(--muted); font-size:14px; margin-bottom:36px; }
+.login-input {
+  width:100%; padding:14px 18px; background:var(--surface2); border:1px solid var(--border);
+  border-radius:12px; color:var(--text); font-size:16px; text-align:center; letter-spacing:3px;
+  margin-bottom:14px; outline:none; transition:border-color .2s;
+}
+.login-input:focus { border-color:var(--verde); }
+.login-btn {
+  width:100%; padding:14px; background:var(--verde); border:none; border-radius:12px;
+  color:#000; font-size:16px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer;
+  transition:background .2s, transform .1s;
+}
+.login-btn:hover { background:var(--verde-dark); }
+.login-btn:active { transform:scale(.98); }
+.login-error { color:var(--danger); font-size:13px; margin-top:10px; display:none; }
+ 
+/* SIDEBAR */
+.sidebar {
+  width:260px; background:var(--surface); border-right:1px solid var(--border);
+  padding:28px 16px; display:flex; flex-direction:column; gap:6px;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.sidebar-logo { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:var(--verde); padding:0 12px; margin-bottom:20px; }
+.menu-item {
+  padding:12px 16px; border-radius:10px; cursor:pointer; font-size:14px; font-weight:500;
+  color:var(--muted); transition:all .2s; display:flex; align-items:center; gap:10px;
+}
+.menu-item:hover { background:var(--surface2); color:var(--text); }
+.menu-item.active { background:rgba(0,196,140,.12); color:var(--verde); }
+.menu-divider { height:1px; background:var(--border); margin:12px 0; }
+.menu-intervencao {
+  padding:12px 16px; border-radius:10px; cursor:pointer; font-size:14px; font-weight:600;
+  color:#fff; background:var(--danger); text-align:center; text-decoration:none;
+  display:block; margin-top:auto; transition:opacity .2s;
+}
+.menu-intervencao:hover { opacity:.85; }
+ 
+/* MAIN */
+.main { flex:1; padding:36px; overflow:auto; }
+.page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; }
+.page-title { font-family:'Syne',sans-serif; font-size:26px; font-weight:800; }
+.btn-save {
+  background:var(--verde); color:#000; border:none; padding:12px 28px;
+  border-radius:10px; font-size:14px; font-weight:700; font-family:'Syne',sans-serif;
+  cursor:pointer; transition:all .2s;
+}
+.btn-save:hover { background:var(--verde-dark); }
+ 
+/* TABS */
+.tab { display:none; }
+.tab.active { display:block; }
+ 
+/* CARDS */
+.card {
+  background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  padding:28px; margin-bottom:24px;
+}
+.card-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+label { font-size:13px; color:var(--muted); font-weight:500; display:block; margin-bottom:6px; margin-top:16px; }
+textarea, input[type=text], input[type=number], select {
+  width:100%; padding:12px 16px; background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; color:var(--text); font-size:14px; font-family:'DM Sans',sans-serif;
+  outline:none; resize:vertical; transition:border-color .2s;
+}
+textarea:focus, input:focus, select:focus { border-color:var(--verde); }
+ 
+/* ITENS (tecnicos, bairros, serviços) */
+.item-list { display:flex; flex-direction:column; gap:12px; margin-top:16px; }
+.item-row {
+  background:var(--surface2); border:1px solid var(--border); border-radius:12px;
+  padding:16px; display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;
+}
+.item-row input { flex:1; min-width:140px; }
+.btn-remove {
+  background:rgba(255,78,106,.15); color:var(--danger); border:1px solid rgba(255,78,106,.3);
+  padding:10px 14px; border-radius:8px; cursor:pointer; font-size:13px; transition:all .2s;
+}
+.btn-remove:hover { background:rgba(255,78,106,.3); }
+.btn-add {
+  background:transparent; color:var(--verde); border:1px solid var(--verde);
+  padding:10px 20px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;
+  margin-top:12px; transition:all .2s;
+}
+.btn-add:hover { background:rgba(0,196,140,.1); }
+ 
+/* CHAT TESTE */
+.chat-box {
+  background:var(--bg); border:1px solid var(--border); border-radius:14px;
+  height:380px; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px;
+}
+.msg-bubble { max-width:75%; padding:12px 16px; border-radius:16px; font-size:14px; line-height:1.5; }
+.msg-bubble.user { background:var(--verde); color:#000; align-self:flex-end; border-bottom-right-radius:4px; }
+.msg-bubble.agent { background:var(--surface2); color:var(--text); align-self:flex-start; border-bottom-left-radius:4px; }
+.msg-bubble.thinking { opacity:.6; font-style:italic; }
+.chat-input-row { display:flex; gap:10px; margin-top:14px; }
+.chat-input-row input {
+  flex:1; padding:12px 16px; background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; color:var(--text); font-size:14px; outline:none;
+}
+.chat-input-row input:focus { border-color:var(--verde); }
+.btn-send {
+  background:var(--verde); color:#000; border:none; padding:12px 20px;
+  border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s;
+}
+.btn-send:hover { background:var(--verde-dark); }
+ 
+/* STATUS */
+.status-dot { width:8px; height:8px; border-radius:50%; background:#00c48c; display:inline-block; margin-right:6px; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+ 
+/* TOAST */
+.toast {
+  position:fixed; bottom:30px; right:30px; background:var(--verde); color:#000;
+  padding:14px 24px; border-radius:12px; font-weight:700; font-size:14px;
+  transform:translateY(100px); opacity:0; transition:all .3s; z-index:9999;
+}
+.toast.show { transform:translateY(0); opacity:1; }
+ 
+/* MOBILE */
+@media(max-width:768px) {
+  body { flex-direction:column; }
+  .sidebar { width:100%; height:auto; flex-direction:row; flex-wrap:wrap; padding:12px; position:relative; overflow-x:auto; }
+  .sidebar-logo { display:none; }
+  .menu-item { padding:10px 12px; font-size:13px; }
+  .menu-divider { display:none; }
+  .menu-intervencao { margin-top:0; }
+  .main { padding:16px; }
+  .page-header { flex-direction:column; gap:12px; align-items:flex-start; }
+}
+</style>
 </head>
 <body>
-
+ 
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">RC Construção</div>
+    <div class="login-sub">Painel de Treinamento da IA</div>
+    <input type="password" id="senhaInput" class="login-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')entrar()">
+    <button class="login-btn" onclick="entrar()">Entrar</button>
+    <div class="login-error" id="loginErro">Senha incorreta. Tente novamente.</div>
+  </div>
+</div>
+ 
+<!-- SIDEBAR -->
 <div class="sidebar">
-    <div class="menu-item active" onclick="mostrar('personalidade')">👤 Personalidade</div>
-    <div class="menu-item" onclick="mostrar('scripts')">📝 Scripts</div>
-    <div class="menu-item" onclick="mostrar('regras')">⚖️ Regras</div>
-    <div class="menu-item" onclick="mostrar('precos')">💰 Preços</div>
-    <div class="menu-item" onclick="mostrar('tecnicos')">🔧 Técnicos</div>
-    <div class="menu-item" onclick="mostrar('teste')">🧪 Testar</div>
-    <a href="/intervencao.html" style="margin-top:20px;color:#00b894;font-size:18px;text-decoration:none;width:100%;text-align:center;">🚨 Intervenção</a>
+  <div class="sidebar-logo">🤖 RC IA</div>
+  <div class="menu-item active" onclick="mostrar('personalidade',this)">👤 Personalidade</div>
+  <div class="menu-item" onclick="mostrar('scripts',this)">📝 Scripts</div>
+  <div class="menu-item" onclick="mostrar('regras',this)">⚖️ Regras</div>
+  <div class="menu-item" onclick="mostrar('tecnicos',this)">🔧 Técnicos</div>
+  <div class="menu-item" onclick="mostrar('bairros',this)">📍 Bairros</div>
+  <div class="menu-item" onclick="mostrar('servicos',this)">🛠 Serviços</div>
+  <div class="menu-divider"></div>
+  <div class="menu-item" onclick="mostrar('teste',this)">🧪 Testar Robô</div>
+  <a href="/intervencao.html" class="menu-intervencao">🚨 Intervenção</a>
 </div>
-
+ 
+<!-- MAIN -->
 <div class="main">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
-        <h1>Treinamento do Robô</h1>
-        <button class="btn" onclick="salvarTudo()">💾 Salvar Tudo</button>
+  <div class="page-header">
+    <div>
+      <div class="page-title">Treinamento do Agente</div>
+      <div style="color:var(--muted);font-size:13px;margin-top:4px;"><span class="status-dot"></span>Agente ativo</div>
     </div>
-
-    <div id="personalidade" class="tab active card">
-        <h2>👤 Personalidade</h2>
-        <textarea id="txtPersonalidade" rows="6"></textarea>
+    <button class="btn-save" onclick="salvarTudo()">💾 Salvar Tudo</button>
+  </div>
+ 
+  <!-- PERSONALIDADE -->
+  <div id="personalidade" class="tab active">
+    <div class="card">
+      <div class="card-title">👤 Personalidade da IA</div>
+      <label>Como o agente deve se comportar e se comunicar com os clientes?</label>
+      <textarea id="txtPersonalidade" rows="6" placeholder="Ex: Seja simpática, rápida, use linguagem informal mas profissional, chame o cliente pelo nome, use emojis com moderação..."></textarea>
     </div>
-    <div id="scripts" class="tab card">
-        <h2>📝 Scripts</h2>
-        <textarea id="txtScripts" rows="10"></textarea>
+  </div>
+ 
+  <!-- SCRIPTS -->
+  <div id="scripts" class="tab">
+    <div class="card">
+      <div class="card-title">📝 Scripts de Atendimento</div>
+      <label>Mensagens padrão, frases de boas-vindas, despedida, agendamento...</label>
+      <textarea id="txtScripts" rows="12" placeholder="Ex: Boas-vindas: 'Olá! Sou a Ana da RC Construção 😊 Como posso te ajudar hoje?'&#10;Agendamento: 'Ótimo! Vou agendar para o técnico mais próximo...'&#10;Cobrança visita: 'O valor da visita técnica no seu bairro é R$X, pago no ato da visita.'"></textarea>
     </div>
-    <div id="regras" class="tab card">
-        <h2>⚖️ Regras</h2>
-        <textarea id="txtRegras" rows="8"></textarea>
+  </div>
+ 
+  <!-- REGRAS -->
+  <div id="regras" class="tab">
+    <div class="card">
+      <div class="card-title">⚖️ Regras do Agente</div>
+      <label>O que o agente DEVE e NÃO DEVE fazer</label>
+      <textarea id="txtRegras" rows="10" placeholder="Ex:&#10;- Nunca revelar que é uma IA&#10;- Sempre tentar fechar o serviço&#10;- Se cliente reclamar de preço, oferecer desconto máximo de 10%&#10;- Confirmar endereço completo antes de agendar&#10;- Pedir foto do problema quando possível"></textarea>
     </div>
-    <div id="precos" class="tab card">
-        <h2>💰 Preços de Serviços</h2>
-        <button class="btn" onclick="adicionarPreco()">+ Novo</button>
-        <div id="listaPrecos"></div>
+  </div>
+ 
+  <!-- TÉCNICOS -->
+  <div id="tecnicos" class="tab">
+    <div class="card">
+      <div class="card-title">🔧 Técnicos</div>
+      <p style="color:var(--muted);font-size:13px;">Cadastre os técnicos. O agente saberá encaminhar para o correto conforme o serviço.</p>
+      <div id="listaTecnicos" class="item-list"></div>
+      <button class="btn-add" onclick="adicionarTecnico()">+ Adicionar Técnico</button>
     </div>
-    <div id="tecnicos" class="tab card">
-        <h2>🔧 Técnicos</h2>
-        <button class="btn" onclick="adicionarTecnico()">+ Novo</button>
-        <div id="listaTecnicos"></div>
+  </div>
+ 
+  <!-- BAIRROS -->
+  <div id="bairros" class="tab">
+    <div class="card">
+      <div class="card-title">📍 Bairros e Valores de Visita</div>
+      <p style="color:var(--muted);font-size:13px;">O agente usará esses valores para informar o cliente o custo da visita técnica.</p>
+      <div id="listaBairros" class="item-list"></div>
+      <button class="btn-add" onclick="adicionarBairro()">+ Adicionar Bairro</button>
     </div>
-    <div id="teste" class="tab card">
-        <h2>🧪 Testar Robô</h2>
-        <div id="chatTeste" style="height:380px;overflow:auto;background:#e5ddd5;padding:15px;border-radius:12px;"></div>
-        <input id="msgTeste" placeholder="Digite como cliente" style="margin-top:15px;width:100%;padding:14px;">
-        <button class="btn" onclick="enviarTeste()" style="margin-top:10px;">Enviar</button>
+  </div>
+ 
+  <!-- SERVIÇOS -->
+  <div id="servicos" class="tab">
+    <div class="card">
+      <div class="card-title">🛠 Serviços</div>
+      <p style="color:var(--muted);font-size:13px;">Cadastre os tipos de serviço que vocês oferecem.</p>
+      <div id="listaServicos" class="item-list"></div>
+      <button class="btn-add" onclick="adicionarServico()">+ Adicionar Serviço</button>
     </div>
+  </div>
+ 
+  <!-- TESTE -->
+  <div id="teste" class="tab">
+    <div class="card">
+      <div class="card-title">🧪 Testar o Agente</div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Simule uma conversa como se fosse um cliente do WhatsApp.</p>
+      <div class="chat-box" id="chatBox">
+        <div class="msg-bubble agent">Olá! Sou a Ana da RC Construção e Reforma 😊 Como posso te ajudar hoje?</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="msgTeste" placeholder="Digite como se fosse o cliente..." onkeydown="if(event.key==='Enter')enviarTeste()">
+        <button class="btn-send" onclick="enviarTeste()">Enviar</button>
+      </div>
+    </div>
+  </div>
 </div>
-
+ 
+<div class="toast" id="toast">✅ Salvo com sucesso!</div>
+ 
 <script>
-    const ADMIN_SENHA = "info261";
-    const SUPABASE_URL = 'https://ehpikmqrieldplwkmyyo.supabase.co';
-    let SUPABASE_KEY = '';
-
-    window.onload = async () => {
-        if (!localStorage.getItem('admin_logged')) {
-            const senha = prompt("🔐 Senha de Administradora:");
-            if (senha !== ADMIN_SENHA) {
-                alert("Senha incorreta.");
-                window.location.href = "/intervencao.html";
-                return;
-            }
-            localStorage.setItem('admin_logged', 'true');
-        }
-
-        // Força pedir a SERVICE ROLE KEY
-        SUPABASE_KEY = prompt("🔑 COLE A SERVICE ROLE KEY AQUI (a chave que termina com TeIQ):\n\nNão use a anon key!");
-        if (!SUPABASE_KEY || SUPABASE_KEY.length < 100) {
-            alert("Chave inválida. Tente novamente.");
-            location.reload();
-            return;
-        }
-        localStorage.setItem('supabase_key', SUPABASE_KEY);
-
-        await carregarDados();
-    };
-
-    function mostrar(id) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.querySelector(`.menu-item[onclick="mostrar('${id}')"]`).classList.add('active');
-    }
-
-   async function salvarTudo() {
-  const body = {
-    personalidade: document.getElementById('txtPersonalidade').value,
-    scripts: document.getElementById('txtScripts').value,
-    regras: document.getElementById('txtRegras').value
-  };
-
-  const res = await fetch("/api/salvar-config", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (res.ok) {
-    alert("✅ SALVO COM SUCESSO!");
+const SENHA_ADMIN = 'info261';
+ 
+// ── LOGIN ──────────────────────────────────────────────────────────────────
+function entrar() {
+  const senha = document.getElementById('senhaInput').value;
+  if (senha === SENHA_ADMIN) {
+    document.getElementById('login-screen').style.display = 'none';
+    carregarTudo();
   } else {
-    const errorText = await res.text();
-    alert("❌ Erro ao salvar:\n" + errorText);
+    document.getElementById('loginErro').style.display = 'block';
+    document.getElementById('senhaInput').value = '';
   }
 }
-
-    async function carregarDados() {
-        try {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/config`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            const data = await res.json();
-            if (data && data[0]) {
-                document.getElementById('txtPersonalidade').value = data[0].personalidade || '';
-                document.getElementById('txtScripts').value = data[0].scripts || '';
-                document.getElementById('txtRegras').value = data[0].regras || '';
-            }
-        } catch(e) {
-            console.log("Erro ao carregar");
-        }
-    }
-
-    function adicionarPreco() { alert("Adicione preços manualmente na tabela config por enquanto"); }
-    function adicionarTecnico() { alert("Adicione técnicos manualmente na tabela Supabase"); }
-
-    async function enviarTeste() {
-        const input = document.getElementById("msgTeste");
-        const chat = document.getElementById("chatTeste");
-        const texto = input.value.trim();
-        if (!texto) return;
-        chat.innerHTML += `<div style="text-align:right;margin:10px;"><b>Você:</b> ${texto}</div>`;
-        input.value = "";
-        try {
-            const res = await fetch("/api/test-chat", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({ mensagem: texto })
-            });
-            const data = await res.json();
-            chat.innerHTML += `<div style="text-align:left;margin:10px;"><b>Agente IA:</b> ${data.resposta}</div>`;
-        } catch(e) {
-            chat.innerHTML += `<div style="text-align:left;margin:10px;color:red;">Erro ao conectar com Groq</div>`;
-        }
-        chat.scrollTop = chat.scrollHeight;
-    }
+ 
+// ── NAVEGAÇÃO ──────────────────────────────────────────────────────────────
+function mostrar(id, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+ 
+// ── SALVAR ─────────────────────────────────────────────────────────────────
+async function salvarTudo() {
+  const btn = document.querySelector('.btn-save');
+  btn.textContent = '⏳ Salvando...';
+  btn.disabled = true;
+ 
+  try {
+    // Salva config principal
+    await fetch('/api/salvar-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        personalidade: document.getElementById('txtPersonalidade').value,
+        scripts: document.getElementById('txtScripts').value,
+        regras: document.getElementById('txtRegras').value
+      })
+    });
+ 
+    // Salva técnicos
+    const tecnicos = coletarTecnicos();
+    await fetch('/api/salvar-tecnicos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tecnicos })
+    });
+ 
+    // Salva bairros
+    const bairros = coletarBairros();
+    await fetch('/api/salvar-bairros', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bairros })
+    });
+ 
+    // Salva serviços
+    const servicos = coletarServicos();
+    await fetch('/api/salvar-servicos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ servicos })
+    });
+ 
+    mostrarToast('✅ Tudo salvo com sucesso!');
+  } catch(e) {
+    mostrarToast('❌ Erro ao salvar: ' + e.message);
+  }
+ 
+  btn.textContent = '💾 Salvar Tudo';
+  btn.disabled = false;
+}
+ 
+// ── TÉCNICOS ───────────────────────────────────────────────────────────────
+function adicionarTecnico(t = {}) {
+  const div = document.createElement('div');
+  div.className = 'item-row';
+  div.innerHTML = `
+    <input type="text" placeholder="Nome do técnico" value="${t.nome||''}" data-field="nome">
+    <input type="text" placeholder="Especialidade (ex: Refrigeração)" value="${t.especialidade||''}" data-field="especialidade">
+    <input type="text" placeholder="WhatsApp (ex: 5511999999999)" value="${t.whatsapp||''}" data-field="whatsapp">
+    <button class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+  `;
+  document.getElementById('listaTecnicos').appendChild(div);
+}
+ 
+function coletarTecnicos() {
+  return [...document.querySelectorAll('#listaTecnicos .item-row')].map(row => ({
+    nome: row.querySelector('[data-field="nome"]').value,
+    especialidade: row.querySelector('[data-field="especialidade"]').value,
+    whatsapp: row.querySelector('[data-field="whatsapp"]').value
+  })).filter(t => t.nome);
+}
+ 
+// ── BAIRROS ────────────────────────────────────────────────────────────────
+function adicionarBairro(b = {}) {
+  const div = document.createElement('div');
+  div.className = 'item-row';
+  div.innerHTML = `
+    <input type="text" placeholder="Nome do bairro" value="${b.nome||''}" data-field="nome" style="flex:2">
+    <input type="number" placeholder="Valor visita (R$)" value="${b.valor_visita||''}" data-field="valor_visita" style="flex:1">
+    <button class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+  `;
+  document.getElementById('listaBairros').appendChild(div);
+}
+ 
+function coletarBairros() {
+  return [...document.querySelectorAll('#listaBairros .item-row')].map(row => ({
+    nome: row.querySelector('[data-field="nome"]').value,
+    valor_visita: row.querySelector('[data-field="valor_visita"]').value
+  })).filter(b => b.nome);
+}
+ 
+// ── SERVIÇOS ───────────────────────────────────────────────────────────────
+function adicionarServico(s = {}) {
+  const div = document.createElement('div');
+  div.className = 'item-row';
+  div.innerHTML = `
+    <input type="text" placeholder="Nome do serviço" value="${s.nome||''}" data-field="nome" style="flex:2">
+    <input type="text" placeholder="Descrição breve" value="${s.descricao||''}" data-field="descricao" style="flex:2">
+    <input type="number" placeholder="Valor visita (R$)" value="${s.valor_visita||''}" data-field="valor_visita" style="flex:1">
+    <button class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+  `;
+  document.getElementById('listaServicos').appendChild(div);
+}
+ 
+function coletarServicos() {
+  return [...document.querySelectorAll('#listaServicos .item-row')].map(row => ({
+    nome: row.querySelector('[data-field="nome"]').value,
+    descricao: row.querySelector('[data-field="descricao"]').value,
+    valor_visita: row.querySelector('[data-field="valor_visita"]').value
+  })).filter(s => s.nome);
+}
+ 
+// ── CARREGAR DADOS ─────────────────────────────────────────────────────────
+async function carregarTudo() {
+  try {
+    const [configRes, tecRes, bairRes, servRes] = await Promise.all([
+      fetch('/api/carregar-config').then(r => r.json()),
+      fetch('/api/carregar-tecnicos').then(r => r.json()),
+      fetch('/api/carregar-bairros').then(r => r.json()),
+      fetch('/api/carregar-servicos').then(r => r.json())
+    ]);
+ 
+    if (configRes?.personalidade) document.getElementById('txtPersonalidade').value = configRes.personalidade;
+    if (configRes?.scripts) document.getElementById('txtScripts').value = configRes.scripts;
+    if (configRes?.regras) document.getElementById('txtRegras').value = configRes.regras;
+ 
+    (tecRes || []).forEach(t => adicionarTecnico(t));
+    (bairRes || []).forEach(b => adicionarBairro(b));
+    (servRes || []).forEach(s => adicionarServico(s));
+  } catch(e) {
+    console.log('Erro ao carregar:', e);
+  }
+}
+ 
+// ── TESTE DO CHAT ──────────────────────────────────────────────────────────
+async function enviarTeste() {
+  const input = document.getElementById('msgTeste');
+  const chat  = document.getElementById('chatBox');
+  const texto = input.value.trim();
+  if (!texto) return;
+ 
+  chat.innerHTML += `<div class="msg-bubble user">${texto}</div>`;
+  input.value = '';
+  chat.scrollTop = chat.scrollHeight;
+ 
+  const thinking = document.createElement('div');
+  thinking.className = 'msg-bubble agent thinking';
+  thinking.textContent = 'Ana está digitando...';
+  chat.appendChild(thinking);
+  chat.scrollTop = chat.scrollHeight;
+ 
+  try {
+    const res  = await fetch('/api/test-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mensagem: texto })
+    });
+    const data = await res.json();
+    thinking.remove();
+    chat.innerHTML += `<div class="msg-bubble agent">${data.resposta}</div>`;
+  } catch(e) {
+    thinking.remove();
+    chat.innerHTML += `<div class="msg-bubble agent" style="color:var(--danger)">Erro de conexão com o agente.</div>`;
+  }
+  chat.scrollTop = chat.scrollHeight;
+}
+ 
+// ── TOAST ──────────────────────────────────────────────────────────────────
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
 </script>
 </body>
 </html>
