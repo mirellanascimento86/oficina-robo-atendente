@@ -89,10 +89,13 @@
             }
             localStorage.setItem('admin_logged', 'true');
         }
-        if (!SUPABASE_KEY) {
-            SUPABASE_KEY = prompt("🔑 Cole sua SERVICE ROLE KEY (a chave secreta, não a anon):");
+
+        // Força pedir a chave novamente se for anon
+        if (!SUPABASE_KEY || SUPABASE_KEY.includes('anon')) {
+            SUPABASE_KEY = prompt("🔑 Cole sua SERVICE ROLE KEY (a chave longa que termina com ...TeIQ):\n\nNão use a anon key!");
             localStorage.setItem('supabase_key', SUPABASE_KEY);
         }
+
         await carregarDados();
     };
 
@@ -124,7 +127,7 @@
         if (res.ok) {
             alert('✅ Salvo com sucesso! Atualize a página para confirmar.');
         } else {
-            alert('❌ Erro ao salvar. Verifique se você está usando a SERVICE ROLE KEY (não a anon key).');
+            alert('❌ Erro ao salvar. Verifique se você colou a SERVICE ROLE KEY corretamente.');
         }
     }
 
@@ -140,7 +143,7 @@
                 document.getElementById('txtRegras').value = data[0].regras || '';
             }
         } catch(e) {
-            console.log("Erro ao carregar");
+            console.log("Erro ao carregar dados");
         }
     }
 
