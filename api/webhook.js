@@ -1,21 +1,24 @@
 export default async function handler(req, res) {
-  // Verificação do Meta
   if (req.method === 'GET') {
-    const VERIFY_TOKEN = 'oficina123token';
-    if (req.query['hub.verify_token'] === VERIFY_TOKEN) {
-      return res.status(200).send(req.query['hub.challenge']);
+    const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'oficina123token';
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      return res.status(200).send(challenge);
     }
-    return res.status(403).send('Token inválido');
+    return res.status(403).send('Forbidden');
   }
 
   if (req.method !== 'POST') return res.status(405).end();
 
-  res.status(200).json({ status: 'ok' });
-
   try {
     await processarMensagem(req.body);
+    return res.status(200).json({ status: 'ok' });
   } catch (erro) {
     console.error('Erro no webhook:', erro);
+    return res.status(500).json({ error: 'erro interno' });
   }
 }
 
