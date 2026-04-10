@@ -2,7 +2,11 @@ export default async function handler(req, res) {
   try {
     const { mensagem } = req.body;
 
-    // BUSCA TREINAMENTO
+    if (!process.env.GROQ_API_KEY) {
+      return res.json({ resposta: "❌ GROQ_API_KEY não configurada" });
+    }
+
+    // busca treinamento
     const config = await fetch(process.env.SUPABASE_URL + '/rest/v1/treinamento?id=eq.1', {
       headers: {
         apikey: process.env.SUPABASE_KEY,
@@ -10,9 +14,8 @@ export default async function handler(req, res) {
       }
     }).then(r => r.json());
 
-    const treinamento = config?.[0]?.conteudo || "Você é uma atendente simpática.";
+    const treinamento = config?.[0]?.conteudo || "Você é uma atendente.";
 
-    // CHAMA GROQ
     const resposta = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -30,12 +33,12 @@ export default async function handler(req, res) {
 
     const dados = await resposta.json();
 
-    res.status(200).json({
-      resposta: dados.choices?.[0]?.message?.content || "Erro na IA"
+    res.json({
+      resposta: dados.choices?.[0]?.message?.content || "Erro na resposta da IA"
     });
 
   } catch (e) {
     console.error(e);
-    res.status(500).json({ resposta: "Erro no servidor" });
+    res.json({ resposta: "Erro no servidor" });
   }
 }
