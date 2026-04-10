@@ -141,6 +141,36 @@ function extrair(texto, chave) {
     const partes = texto.split(chave);
     if (partes.length < 2) return "";
     return partes[1].split("\n\n")[0].trim();
+
+}
+    function adicionarPreco() {
+    const div = document.getElementById("listaPrecos");
+
+    const item = document.createElement("div");
+    item.className = "item";
+
+    item.innerHTML = `
+        <input placeholder="Nome do serviço">
+        <input placeholder="Preço">
+        <button onclick="this.parentElement.remove()">❌</button>
+    `;
+
+    div.appendChild(item);
+}
+
+function adicionarTecnico() {
+    const div = document.getElementById("listaTecnicos");
+
+    const item = document.createElement("div");
+    item.className = "item";
+
+    item.innerHTML = `
+        <input placeholder="Nome do técnico">
+        <input placeholder="Especialidade">
+        <button onclick="this.parentElement.remove()">❌</button>
+    `;
+
+    div.appendChild(item);
 }
 
 </script>
