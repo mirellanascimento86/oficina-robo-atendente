@@ -122,9 +122,10 @@
         });
 
         if (res.ok) {
-            alert('✅ Salvo com sucesso! Atualize a página para ver.');
+            alert('✅ Salvo com sucesso! Atualize a página para confirmar.');
         } else {
-            alert('❌ Erro ao salvar. Verifique se você rodou o SQL da tabela "config".');
+            const err = await res.text();
+            alert('❌ Erro ao salvar: ' + err);
         }
     }
 
@@ -140,13 +141,12 @@
                 document.getElementById('txtRegras').value = data[0].regras || '';
             }
         } catch(e) {
-            console.log("Nenhum dado salvo ainda");
+            console.log("Erro ao carregar dados");
         }
     }
 
-    // Funções simples (preços e técnicos)
-    function adicionarPreco() { alert("Adicione preços manualmente na tabela Supabase por enquanto"); }
-    function adicionarTecnico() { alert("Adicione técnicos manualmente na tabela Supabase por enquanto"); }
+    function adicionarPreco() { alert("Adicione preços manualmente na tabela 'config' ou crie uma tabela separada."); }
+    function adicionarTecnico() { alert("Adicione técnicos manualmente na tabela Supabase."); }
 
     async function enviarTeste() {
         const input = document.getElementById("msgTeste");
