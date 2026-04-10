@@ -181,7 +181,7 @@ function extrair(texto, chave) {
         <input type="text" placeholder="Serviço" style="width:40%">
         <input type="text" placeholder="Preço" style="width:40%">
         <button onclick="this.parentElement.remove()">❌</button>
-          <button onclick="adicionarPreco()">➕</button>
+          <button onclick="adicionarPreco()">✅</button>
     `;
 
     div.appendChild(item);
@@ -196,6 +196,7 @@ function adicionarTecnico() {
     item.innerHTML = `
         <input type="text" placeholder="Nome" style="width:40%">
         <input type="text" placeholder="Especialidade" style="width:40%">
+        <button onclick="adicionarTecnico()">✅</button>
         <button onclick="this.parentElement.remove()">❌</button>
     `;
 
