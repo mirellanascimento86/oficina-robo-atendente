@@ -122,9 +122,9 @@
         });
 
         if (res.ok) {
-            alert('✅ Salvo com sucesso! O robô agora usa essas instruções no WhatsApp.');
+            alert('✅ Salvo com sucesso! Atualize a página para ver.');
         } else {
-            alert('❌ Erro ao salvar. Verifique se a tabela "config" existe no Supabase.');
+            alert('❌ Erro ao salvar. Verifique se você rodou o SQL da tabela "config".');
         }
     }
 
@@ -144,6 +144,7 @@
         }
     }
 
+    // Funções simples (preços e técnicos)
     function adicionarPreco() { alert("Adicione preços manualmente na tabela Supabase por enquanto"); }
     function adicionarTecnico() { alert("Adicione técnicos manualmente na tabela Supabase por enquanto"); }
 
