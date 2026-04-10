@@ -89,6 +89,20 @@ async function salvarTudo() {
     const scripts = document.getElementById("txtScripts").value;
     const regras = document.getElementById("txtRegras").value;
 
+    // PEGA PREÇOS
+    let precos = [];
+    document.querySelectorAll("#listaPrecos .item").forEach(el => {
+        const inputs = el.querySelectorAll("input");
+        precos.push(`${inputs[0].value} - ${inputs[1].value}`);
+    });
+
+    // PEGA TÉCNICOS
+    let tecnicos = [];
+    document.querySelectorAll("#listaTecnicos .item").forEach(el => {
+        const inputs = el.querySelectorAll("input");
+        tecnicos.push(`${inputs[0].value} - ${inputs[1].value}`);
+    });
+
     const conteudo = `
 PERSONALIDADE:
 ${personalidade}
@@ -98,9 +112,15 @@ ${scripts}
 
 REGRAS:
 ${regras}
+
+PREÇOS:
+${precos.join("\n")}
+
+TÉCNICOS:
+${tecnicos.join("\n")}
 `;
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/treinamento`, {
+    await fetch(`${SUPABASE_URL}/rest/v1/treinamento`, {
         method: "POST",
         headers: {
             "apikey": SUPABASE_KEY,
@@ -108,14 +128,14 @@ ${regras}
             "Content-Type": "application/json",
             "Prefer": "resolution=merge-duplicates"
         },
-        body: JSON.stringify({ id: 1, conteudo })
+        body: JSON.stringify({
+            id: 1,
+            conteudo
+        })
     });
 
-    console.log("SALVAR:", await res.text());
-
-    alert("✅ Treinamento salvo!");
+    alert("✅ TREINAMENTO COMPLETO SALVO!");
 }
-
 // CARREGAR FUNCIONANDO
 async function carregarDados() {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/treinamento?id=eq.1`, {
